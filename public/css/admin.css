@@ -1,0 +1,307 @@
+/* ====================================================================
+   INEVAROLI Joyería — Panel de Administración y Control de Inventario
+   Diseñado para gestión rápida, responsiva y sin dependencias externas.
+   ==================================================================== */
+
+.admin-modal-caja {
+  max-width: 980px !important;
+  width: 95% !important;
+  background: var(--modal-bg) !important;
+}
+
+[data-theme="dark"] .admin-modal-caja {
+  background: #0d1424 !important;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid var(--border-gold);
+  margin-bottom: 18px;
+  overflow-x: auto;
+}
+
+.admin-tab-btn {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-gold);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  color: var(--text-secondary);
+  padding: 10px 18px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition-fast);
+}
+
+.admin-tab-btn:hover {
+  color: var(--gold-primary);
+  background: var(--border-gold);
+}
+
+.admin-tab-btn.activo {
+  background: var(--gold-btn-gradient);
+  color: #0b0f19;
+  border-color: var(--gold-primary);
+  box-shadow: 0 -2px 10px rgba(212, 175, 55, 0.2);
+}
+
+/* Barra de Búsqueda Admin */
+.admin-barra-busqueda-wrap {
+  margin-bottom: 14px;
+}
+
+.admin-input-busqueda {
+  width: 100%;
+  padding: 10px 16px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  outline: none;
+  transition: var(--transition-fast);
+}
+
+.admin-input-busqueda:focus {
+  border-color: var(--gold-primary);
+  box-shadow: 0 0 8px rgba(197, 155, 39, 0.3);
+}
+
+.admin-select-filtro {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Tabla Administrativa */
+.tabla-admin-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.tabla-admin {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.tabla-admin th {
+  background: var(--bg-surface);
+  color: var(--gold-primary);
+  padding: 12px 14px;
+  font-weight: 800;
+  border-bottom: 2px solid var(--border-gold);
+  white-space: nowrap;
+}
+
+.tabla-admin td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-gold);
+  vertical-align: middle;
+}
+
+.tabla-admin tr:hover {
+  background: var(--border-gold);
+}
+
+/* Acciones en Tabla Admin */
+.admin-acciones-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.btn-stock {
+  background: #10b981 !important;
+  color: #fff !important;
+  font-weight: 800;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.btn-stock:hover {
+  background: #059669 !important;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+
+.btn-editar {
+  background: #3b82f6 !important;
+  color: #fff !important;
+  font-weight: 700;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.btn-editar:hover {
+  background: #2563eb !important;
+}
+
+.btn-activar {
+  background: #16a34a !important;
+  color: #fff !important;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.btn-desactivar {
+  background: #ea580c !important;
+  color: #fff !important;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.btn-eliminar-prod {
+  background: #dc2626 !important;
+  color: #fff !important;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.btn-eliminar-prod:hover {
+  background: #b91c1c !important;
+}
+
+.badge-stock-admin {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 0.8rem;
+}
+
+.badge-stock-admin.disponible {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.badge-stock-admin.critico {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+
+.badge-stock-admin.agotado {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.badge-admin-descuento {
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.btn-remover-desc {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  font-size: 1rem;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.btn-asignar-desc {
+  background: transparent;
+  border: 1px dashed rgba(212, 175, 55, 0.4);
+  color: var(--gold-light);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.btn-rec-si {
+  background: #f59e0b;
+  color: #000;
+  border: none;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.btn-rec-no {
+  background: #334155;
+  color: #94a3b8;
+  border: none;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+/* Pedidos Admin Cards */
+.admin-pedidos-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-pedido-card {
+  background: #080d18;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.admin-pedido-header {
+  padding: 10px 14px;
+  background: #141e33;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.9rem;
+}
+
+.admin-pedido-body {
+  padding: 12px 14px;
+}
+
+.admin-pedido-footer {
+  padding: 10px 14px;
+  background: #0c1220;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.admin-select-estado {
+  background: #0b0f19;
+  border: 1px solid var(--gold-primary);
+  color: var(--gold-light);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}

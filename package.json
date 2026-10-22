@@ -1,0 +1,9 @@
+{
+  "name": "inevaroli-joyeria",
+  "version": "1.0.0",
+  "description": "Sistema web de joyería fina y control de inventario para INEVAROLI (@inveranoli2017)",
+  "scripts": {
+    "start": "node -e \"const http=require('http'), fs=require('fs'), path=require('path'); const port=3000; const mime={'.html':'text/html','.css':'text/css','.js':'application/javascript','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.svg':'image/svg+xml'}; http.createServer((req,res)=>{ let p=path.join(__dirname,'public',req.url==='/'?'index.html':req.url.split('?')[0]); fs.readFile(p,(err,data)=>{ if(err){res.writeHead(404);return res.end('Not Found');} res.writeHead(200,{'Content-Type':mime[path.extname(p)]||'application/octet-stream'}); res.end(data); }); }).listen(port,()=>console.log('INEVAROLI ejecutándose en http://localhost:'+port));\"",
+    "server:db": "node servidor_database.js"
+  }
+}

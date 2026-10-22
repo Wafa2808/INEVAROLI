@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="INEVAROLI Joyería (@inveranoli2017) — Fabricación y venta de anillos de grado para bachilleres y universidades (UC, UAM, UJAP), alianzas de matrimonio, anillos de compromiso, cadenas y accesorios en acero quirúrgico 316L y plata ley 925 en Valencia, Venezuela.">
+  <meta name="keywords" content="anillos de grado valencia, joyeria valencia carabobo, inveranoli2017, anillos de grado uc, anillos de grado bachiller, alianzas de boda valencia, acero quirurgico 316l">
+  <meta name="author" content="INEVAROLI Joyería">
+  <title>INEVAROLI Joyería Fina | Anillos de Grado, Matrimonio & Acero 316L</title>
+  
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/modales.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+  <!-- ─── Cabecera Principal (Header) ─── -->
+  <!-- ─── Cabecera Principal al estilo Amazon + Joyería Instagram ─── -->
+  <header class="amz-header">
+    <div class="amz-header-top">
+      <!-- Marca y Logotipo -->
+      <div class="amz-brand-zone">
+        <button type="button" id="btn-menu-lateral" class="amz-btn-menu" aria-label="Abrir menú" title="Menú de colecciones">
+          <span class="amz-menu-icon" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+          <span class="amz-menu-text">Todo</span>
+        </button>
+
+        <div class="amz-logo-box" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+          <img src="logo.png" alt="Logotipo Oficial INEVAROLI Joyería" class="amz-brand-logo">
+          <div class="amz-brand-info">
+            <span class="amz-brand-title">INEVAROLI</span>
+            <span class="amz-brand-subtitle">JOYERÍA FINA • @inveranoli2017</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ubicación física / Envío estilo Amazon -->
+      <div class="amz-deliver-box" onclick="document.getElementById('ubicacion-tienda').scrollIntoView({behavior:'smooth'})" title="Ubicación física de la tienda">
+        <img src="icons/location.png" alt="" class="amz-deliver-icon">
+        <div class="amz-deliver-texts">
+          <span class="amz-deliver-small">Retiro en Tienda</span>
+          <span class="amz-deliver-bold">CC Gran Bazar, Valencia</span>
+        </div>
+      </div>
+
+      <!-- Buscador Central Tipo Amazon con Selector -->
+      <div class="amz-search-container">
+        <div class="amz-search-box">
+          <select id="amz-search-cat" class="amz-search-select" onchange="seleccionarCategoria(this.value)">
+            <option value="0">Todas</option>
+            <option value="1">Grado Bachiller</option>
+            <option value="2">Grado Universidad</option>
+            <option value="3">Compromiso</option>
+            <option value="4">Matrimonio</option>
+            <option value="5">Cadenas</option>
+            <option value="6">Dijes</option>
+            <option value="7">Pulseras</option>
+            <option value="8">Zarcillos</option>
+          </select>
+          <input id="buscar" type="search" placeholder="Buscar anillos de grado, matrimonio, cadenas en acero 316L y plata..." aria-label="Buscar en INEVAROLI">
+          <button type="button" class="amz-search-btn" title="Buscar joyas" onclick="renderProductos()">
+            <img src="icons/search.png" alt="" class="amz-search-btn-icon">
+          </button>
+        </div>
+      </div>
+
+      <!-- Tasa Oficial BCV Integrada -->
+      <div class="amz-bcv-box" id="bcv-widget" title="Tasa oficial Banco Central de Venezuela. Clic para refrescar." onclick="TasaBCV.refrescar()">
+        <span class="amz-bcv-tag">BCV VZLA</span>
+        <div class="amz-bcv-data">
+          <span id="bcv-valor-tasa" class="amz-bcv-val">Bs. 880.12</span>
+          <small id="bcv-fecha-tasa" class="amz-bcv-sub">Oficial</small>
+        </div>
+        <button type="button" class="amz-bcv-refresh">⟳</button>
+      </div>
+
+      <!-- Controles de Usuario, Tema y Carrito -->
+      <div class="amz-actions-zone">
+        <!-- Selector Modo Claro / Modo Oscuro -->
+        <button id="btn-toggle-theme" class="amz-theme-btn" type="button" onclick="alternarTemaVisual()" title="Cambiar Tema (Claro / Oscuro)">
+          <span id="theme-toggle-icon">🌙</span>
+        </button>
+
+        <!-- Botones de Autenticación / Cuenta -->
+        <div id="auth-buttons-publicos" class="amz-auth-group">
+          <button id="btn-abrir-login" class="amz-nav-btn" type="button">
+            <span class="amz-btn-sub">Hola, identifícate</span>
+            <span class="amz-btn-bold">Cuenta y Pedidos</span>
+          </button>
+          <button id="btn-abrir-registro" class="amz-reg-badge" type="button">
+            Registro
+          </button>
+        </div>
+
+        <!-- Usuario con Sesión Activa -->
+        <div id="user-pill" style="display:none;" class="amz-user-active">
+          <div class="amz-user-meta">
+            <span class="amz-btn-sub">Bienvenido(a),</span>
+            <span id="user-name-display" class="amz-btn-bold"></span>
+          </div>
+          <button id="btn-perfil" class="amz-sub-btn" type="button" title="Mi perfil">Perfil</button>
+          <button id="btn-pedidos" class="amz-sub-btn" type="button" title="Mis pedidos">Mis Pedidos</button>
+          <button id="btn-favoritos" class="amz-sub-btn" type="button" onclick="Favoritos.mostrarModal()" title="Mis joyas favoritas">
+            ❤ Favoritos <span class="fav-count-badge cart-badge" style="display:none;">0</span>
+          </button>
+          <button id="btn-admin" class="amz-sub-btn amz-admin-btn" type="button" style="display:none;" title="Panel de Control">Admin</button>
+          <button id="btn-logout" class="amz-sub-btn amz-logout-btn" type="button" onclick="cerrarSesion()" title="Cerrar sesión">Salir</button>
+        </div>
+
+        <!-- Carrito de Compras Amazon Style -->
+        <button id="toggle-cart" class="amz-cart-btn" type="button" title="Ver pedido de joyería">
+          <div class="amz-cart-icon-wrap">
+            <img src="icons/cart.png" alt="" class="amz-cart-img">
+            <span id="cart-count" class="amz-cart-badge">0</span>
+          </div>
+          <span class="amz-cart-label">Carrito</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ─── Sub-Barra de Departamentos (Amazon Subnav) ─── -->
+    <div class="amz-subnav">
+      <div class="amz-subnav-container">
+        <button class="amz-subnav-pill" onclick="seleccionarCategoria(0)">
+          <svg viewBox="0 0 24 24" class="amz-subnav-svg"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          <strong>Todas las Colecciones</strong>
+        </button>
+        <a href="#catalogo-header" class="amz-subnav-link" onclick="seleccionarCategoria(1)">🎓 Anillos de Grado</a>
+        <a href="#catalogo-header" class="amz-subnav-link" onclick="seleccionarCategoria(4)">💍 Alianzas de Matrimonio</a>
+        <a href="#catalogo-header" class="amz-subnav-link" onclick="seleccionarCategoria(3)">✨ Anillos de Compromiso</a>
+        <a href="#catalogo-header" class="amz-subnav-link" onclick="seleccionarCategoria(5)">⛓ Cadenas & Dijes 316L</a>
+        <a href="#seccion-recomendados" class="amz-subnav-link">⭐ Joyas Más Vendidas</a>
+        <a href="#" class="amz-subnav-link" onclick="abrirGuiaTallasModal(); return false;">📏 Guía Oficial de Tallas</a>
+        <a href="#ubicacion-tienda" class="amz-subnav-link">📍 Tienda Gran Bazar</a>
+        
+        <div class="amz-subnav-right">
+          <a href="https://www.instagram.com/inveranoli2017/" target="_blank" rel="noopener" class="amz-ig-badge">
+            <svg viewBox="0 0 24 24" class="amz-ig-svg"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+            @inveranoli2017
+          </a>
+          <a href="https://wa.me/584125006377" target="_blank" rel="noopener" class="amz-wa-badge">
+            💬 WhatsApp Pedidos
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── Banner Hero Showcase (Carrusel Principal) ─── -->
+  <section class="hero-showcase" id="hero-slider">
+    <!-- Slide 1: Anillos de Grado 2026 -->
+    <div class="hero-slide activo">
+      <img src="images/banner_grado.jpg" alt="Anillos de Grado INEVAROLI" class="hero-bg-img">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <span class="hero-tag">COLECCIÓN OFICIAL DE GRADO 2026</span>
+        <h2 class="hero-title">Anillos de Grado Bachiller & Universitarios</h2>
+        <p class="hero-desc">Fabricados a la medida en Plata Ley 925 y Acero Quirúrgico 316L. Modelos oficiales para UC, UAM, UJAP, Medicina, Derecho e Ingeniería con grabado de cortesía y estuche de pana.</p>
+        <div class="hero-btn-group">
+          <button type="button" class="btn" onclick="seleccionarCategoria(1); document.getElementById('catalogo-header').scrollIntoView({behavior:'smooth'});">Explorar Grado</button>
+          <button type="button" class="btn btn-detalle" onclick="abrirGuiaTallasModal();">Ver Guía de Tallas</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 2: Bodas & Matrimonio -->
+    <div class="hero-slide">
+      <img src="images/banner_bodas.jpg" alt="Alianzas y Anillos de Matrimonio" class="hero-bg-img">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <span class="hero-tag">BODAS & COMPROMISO</span>
+        <h2 class="hero-title">Tríos Matrimoniales y Solitarios Exclusivos</h2>
+        <p class="hero-desc">Alianzas diamantadas y clásicas con grabado interior de nombres y fecha sin costo adicional. Símbolo inalterable de unión con circonias suizas corte brillante.</p>
+        <div class="hero-btn-group">
+          <button type="button" class="btn" onclick="seleccionarCategoria(4); document.getElementById('catalogo-header').scrollIntoView({behavior:'smooth'});">Ver Alianzas de Boda</button>
+          <button type="button" class="btn btn-detalle" onclick="seleccionarCategoria(3); document.getElementById('catalogo-header').scrollIntoView({behavior:'smooth'});">Anillos de Compromiso</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3: Joyería en Acero & Plata -->
+    <div class="hero-slide">
+      <img src="images/banner_joyas.jpg" alt="Cadenas y Joyería Fina" class="hero-bg-img">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <span class="hero-tag">ACERO QUIRÚRGICO 316L & PLATA 925</span>
+        <h2 class="hero-title">Cadenas Cubanas, Dijes & Esclavas</h2>
+        <p class="hero-desc">Accesorios hipoalergénicos que no manchan ni pierden el brillo. Tejido cubano, medallas devocionales de la Virgen del Socorro y esclavas grabables para dama y caballero.</p>
+        <div class="hero-btn-group">
+          <button type="button" class="btn" onclick="seleccionarCategoria(5); document.getElementById('catalogo-header').scrollIntoView({behavior:'smooth'});">Ver Cadenas y Dijes</button>
+          <button type="button" class="btn btn-detalle" onclick="document.getElementById('ubicacion-tienda').scrollIntoView({behavior:'smooth'});">Visitar Tienda en Valencia</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controles del Slider -->
+    <button type="button" class="hero-nav-btn prev" onclick="CarruselInicio.anteriorHero()" aria-label="Banner anterior">‹</button>
+    <button type="button" class="hero-nav-btn next" onclick="CarruselInicio.siguienteHero()" aria-label="Banner siguiente">›</button>
+    <div class="hero-dots-wrap" id="hero-dots"></div>
+  </section>
+
+  <!-- ─── Showcase de Categorías Verticales (Estilo Amazon + Instagram Joyería) ─── -->
+  <section class="amz-showcase-section" aria-label="Colecciones destacadas">
+    <div class="amz-showcase-grid">
+      <!-- Tarjeta 1: Grado -->
+      <article class="amz-showcase-card amz-card-grado" onclick="seleccionarCategoria(1); document.getElementById('catalogo-header').scrollIntoView({behavior:'smooth'});">
+        <div class="amz-card-header">
+          <span class="amz-card-tag">Promoción 2026</span>
+          <h3 class="amz-card-title">Anillos de Grado</h3>
+          <p class="amz-card-sub">Bachiller y Universidad en Plata Ley 925</p>
+        </div>
+        <div class="amz-card-media">
+          <img src="images/prod_1_grado_bachiller_ciencias.jpg" alt="Anillo de Grado Bachiller" loading="lazy">
+        </div>
+        <div class="amz-card-footer">
+          <span class="amz-card-action">Explorar modelos oficiales ›</span>
+        </div>
+      </article>
+
+      <!-- Tarjeta 2: Bodas & Matrimonio -->
+      <article class="amz-showcase-card amz-card-bodas" onclick="seleccionarCategoria(4); document.getElementById('catalogo-header').scrollIntoView({behavior:'smooth'});">
+        <div class="amz-card-header">
+          <span class="amz-card-tag">Amor Eterno</span>
+          <h3 class="amz-card-title">Alianzas de Boda</h3>
+          <p class="amz-card-sub">Tríos y pares con grabado de nombres gratis</p>
+        </div>
+        <div class="amz-card-media">
+          <img src="images/prod_13_trio_matrimonial.jpg" alt="Trío Matrimonial" loading="lazy">
+        </div>
+        <div class="amz-card-footer">
+          <span class="amz-card-action">Ver alianzas y tríos ›</span>
+        </div>
+      </article>
+
+      <!-- Tarjeta 3: Compromiso & Solitarios -->
+      <article class="amz-showcase-card amz-card-compromiso" onclick="seleccionarCategoria(3); document.getElementById('catalogo-header').scrollIntoView({behavior:'smooth'});">
+        <div class="amz-card-header">
+          <span class="amz-card-tag">El Sí Quiero</span>
+          <h3 class="amz-card-title">Compromiso & Tiaras</h3>
+          <p class="amz-card-sub">Circonias corte diamante y acabados en oro</p>
+        </div>
+        <div class="amz-card-media">
+          <img src="images/prod_9_solitario_clasico.jpg" alt="Anillo Solitario Clásico" loading="lazy">
+        </div>
+        <div class="amz-card-footer">
+          <span class="amz-card-action">Descubrir solitarios ›</span>
+        </div>
+      </article>
+
+      <!-- Tarjeta 4: Cadenas & Dijes 316L -->
+      <article class="amz-showcase-card amz-card-acero" onclick="seleccionarCategoria(5); document.getElementById('catalogo-header').scrollIntoView({behavior:'smooth'});">
+        <div class="amz-card-header">
+          <span class="amz-card-tag">Tendencia 316L</span>
+          <h3 class="amz-card-title">Cadenas Cubanas</h3>
+          <p class="amz-card-sub">Acero dorado y plateado que no pierde brillo</p>
+        </div>
+        <div class="amz-card-media">
+          <img src="images/prod_16_cadena_cubana.jpg" alt="Cadena Cubana Acero Dorado" loading="lazy">
+        </div>
+        <div class="amz-card-footer">
+          <span class="amz-card-action">Ver cadenas y dijes ›</span>
+        </div>
+      </article>
+
+      <!-- Tarjeta 5: Zarcillos & Accesorios -->
+      <article class="amz-showcase-card amz-card-aretes" onclick="seleccionarCategoria(2); document.getElementById('catalogo-header').scrollIntoView({behavior:'smooth'});">
+        <div class="amz-card-header">
+          <span class="amz-card-tag">Para Lucirte</span>
+          <h3 class="amz-card-title">Zarcillos & Aretes</h3>
+          <p class="amz-card-sub">Argollas y abridores delicados de diario</p>
+        </div>
+        <div class="amz-card-media">
+          <img src="images/prod_20_medalla_virgen_socorro.jpg" alt="Medalla Virgen del Socorro y Accesorios" loading="lazy">
+        </div>
+        <div class="amz-card-footer">
+          <span class="amz-card-action">Ver aretes y dijes ›</span>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ─── Barra de Filtros de Categoría (Pills) ─── -->
+  <section class="categoria-pills-section">
+    <div class="categoria-pills-wrap" id="categoria-pills-wrap">
+      <!-- Se pueblan dinámicamente con JavaScript -->
+    </div>
+  </section>
+
+  <!-- ─── Contenedor Principal: Catálogo de Joyas ─── -->
+  <main>
+    <div class="seccion-header" id="catalogo-header">
+      <h2 class="seccion-titulo">
+        Catálogo de Joyería & Accesorios
+      </h2>
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <span id="estado-servidor-db-badge" class="servidor-badge desconectado" title="Estado de la base de datos externa (puerto 3001)">● Verificando Servidor BD...</span>
+        <span class="seccion-contador" id="catalogo-contador-texto">Cargando inventario...</span>
+      </div>
+    </div>
+
+    <div class="productos-grid" id="productos-grid">
+      <!-- Se inyectan las tarjetas de joyas con JavaScript -->
+    </div>
+
+    <!-- ─── Sección: Carrusel de Recomendados ─── -->
+    <section class="seccion-carrusel" id="seccion-recomendados">
+      <div class="seccion-header">
+        <h3 class="seccion-titulo" style="color:var(--gold-light);">
+          Joyas Más Populares & Recomendadas
+        </h3>
+        <span class="seccion-contador">Selección destacada de @inveranoli2017</span>
+      </div>
+      <div class="carrusel-track-wrap">
+        <button type="button" class="carrusel-arrow-btn prev" onclick="CarruselInicio.scrollRecomendados(-1)" aria-label="Anterior recomendado">‹</button>
+        <div class="carrusel-track" id="carrusel-recomendados-track"></div>
+        <button type="button" class="carrusel-arrow-btn next" onclick="CarruselInicio.scrollRecomendados(1)" aria-label="Siguiente recomendado">›</button>
+      </div>
+    </section>
+
+    <!-- ─── Sección: Ubicación de la Tienda Física en Valencia ─── -->
+    <section class="seccion-ubicacion" id="ubicacion-tienda">
+      <div class="ubicacion-info">
+        <h3>Visítanos en Nuestra Tienda Física</h3>
+        <p style="color:var(--text-secondary); margin-bottom:18px;">
+          Atención personalizada en pleno centro comercial de Valencia. Ven a tomarte la medida exacta de tu dedo, ver muestras de anillos de grado de todas las universidades y apreciar el brillo de nuestras joyas.
+        </p>
+        <div class="ubicacion-item">
+          <img src="icons/location.png" alt="" class="ui-icon ui-icon-white">
+          <div>
+            <strong>Dirección Comercial:</strong><br>
+            Av. Lara, Centro Comercial Gran Bazar, Planta Baja (Diagonal a Colchoganga), a una cuadra de la Plaza La Candelaria, Valencia, Edo. Carabobo.
+          </div>
+        </div>
+        <div class="ubicacion-item">
+          <img src="icons/clock.png" alt="" class="ui-icon ui-icon-white">
+          <div>
+            <strong>Horario de Atención:</strong><br>
+            Lunes a Sábado de 9:00 AM a 6:00 PM (Horario Corrido).
+          </div>
+        </div>
+      </div>
+
+      <div class="ubicacion-cta-box">
+        <h4 style="color:var(--gold-light); font-size:1.15rem;">¿Dudas sobre tu anillo o pedido?</h4>
+        <p style="font-size:0.88rem; color:var(--text-muted);">
+          Escríbenos directamente o síguenos en Instagram para ver fotos y videos reales de entregas a graduandos y parejas.
+        </p>
+        <div style="display:flex; justify-content:center; gap:12px; margin-top:8px; flex-wrap:wrap;">
+          <a href="https://wa.me/584125006377" target="_blank" rel="noopener" class="btn btn-sm" style="background:#25d366; color:#000;">
+            <img src="icons/whatsapp.png" alt="" class="ui-icon"> WhatsApp: 0412-5006377
+          </a>
+          <a href="https://www.instagram.com/inveranoli2017/" target="_blank" rel="noopener" class="btn btn-sm" style="background:#e1306c; color:#fff;">
+            Instagram: @inveranoli2017
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ─── Pie de Página (Footer) ─── -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-col">
+        <div class="logo-box" style="margin-bottom:12px;">
+          <img src="logo.png" alt="INEVAROLI Joyería" class="brand-logo-img">
+          <div class="brand-names">
+            <span class="sub-brand">JOYERÍA FINA & ACERO</span>
+            <span class="main-brand" style="font-size:1.2rem;">INEVAROLI</span>
+          </div>
+        </div>
+        <p>Especialistas en anillos de graduación para bachilleres y universidades de Venezuela (UC, UAM, UJAP), alianzas de matrimonio, anillos de promesa y joyería en Acero Quirúrgico 316L y Plata Ley 925.</p>
+        <p><strong style="color:var(--gold-light);">Instagram Oficial:</strong> <a href="https://www.instagram.com/inveranoli2017/" target="_blank" rel="noopener" style="color:#e1306c; font-weight:bold;">@inveranoli2017</a></p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Colecciones</h4>
+        <ul>
+          <li><a href="#catalogo-header" onclick="seleccionarCategoria(1)">Anillos de Bachiller</a></li>
+          <li><a href="#catalogo-header" onclick="seleccionarCategoria(2)">Anillos Universitarios</a></li>
+          <li><a href="#catalogo-header" onclick="seleccionarCategoria(3)">Compromiso & Promesa</a></li>
+          <li><a href="#catalogo-header" onclick="seleccionarCategoria(4)">Tríos Matrimoniales</a></li>
+          <li><a href="#catalogo-header" onclick="seleccionarCategoria(5)">Cadenas & Dijes</a></li>
+          <li><a href="#catalogo-header" onclick="seleccionarCategoria(7)">Esclavas Grabables</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Servicios & Garantía</h4>
+        <ul>
+          <li><a href="#" onclick="abrirGuiaTallasModal(); return false;">Guía de Tallas de Anillos</a></li>
+          <li><a href="#ubicacion-tienda">Retiro en Tienda Gran Bazar</a></li>
+          <li><a href="#ubicacion-tienda">Envíos Nacionales (MRW/Zoom)</a></li>
+          <li><a href="#catalogo-header">Grabado Láser de Cortesía</a></li>
+          <li><a href="#ubicacion-tienda">Estuche de Pana Incluido</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Información Comercial</h4>
+        <p><strong>RIF:</strong> <span id="footer-rif">J-316090539</span></p>
+        <p><strong>Ubicación:</strong> CC Gran Bazar, Av. Lara, PB, Valencia, Edo. Carabobo, Venezuela.</p>
+        <p><strong>Contacto / WhatsApp:</strong> <a href="https://wa.me/584125006377" target="_blank" rel="noopener" style="color:var(--gold-light); font-weight:bold;">0412-5006377</a></p>
+        <p><strong>Métodos de Pago:</strong> Pago Móvil, Transferencia Bancaria y Efectivo Divisas ($ USD) / Bs.</p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>&copy; 2026 INEVAROLI Joyería (@inveranoli2017). Todos los derechos reservados. Valencia, Venezuela.</div>
+      <div>Sistema web optimizado para máximo rendimiento, sin dependencias externas.</div>
+    </div>
+  </footer>
+
+  <!-- ══════════════════════════════════════════════════
+       MODALES DE LA APLICACIÓN
+       ══════════════════════════════════════════════════ -->
+
+  <!-- ─── Modal 1: Autenticación (Login, Registro, Recuperación) ─── -->
+  <div id="auth-modal" class="modal-fondo" style="display:none;">
+    <div class="modal-caja auth-modal-split">
+      <button type="button" class="modal-cerrar" onclick="cerrarAuthModal()">×</button>
+
+      <!-- Columna Izquierda: Identidad Luxury INEVAROLI & Accesos Rápidos Demo -->
+      <div class="auth-brand-side">
+        <div>
+          <div class="auth-brand-logo-wrap">
+            <img src="images/logo.png" alt="INEVAROLI Joyería" class="auth-brand-logo-img">
+            <h3 class="auth-brand-titulo">INEVAROLI</h3>
+            <p class="auth-brand-subtitulo">Atelier de Joyería & Orfebrería</p>
+          </div>
+
+          <div class="auth-brand-caracteristicas">
+            <div class="auth-brand-item">
+              <span>✦</span>
+              <span>Anillos de Grado en Plata 925 y Acero 316L</span>
+            </div>
+            <div class="auth-brand-item">
+              <span>✦</span>
+              <span>Alianzas de Matrimonio y Tríos de Compromiso</span>
+            </div>
+            <div class="auth-brand-item">
+              <span>✦</span>
+              <span>Garantía de Orfebrería • CC Gran Bazar Valencia</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna Derecha: Formularios con Tabs Elegantes -->
+      <div class="auth-form-side">
+        <div class="auth-tabs-header">
+          <button type="button" id="tab-auth-btn-login" class="auth-tab-btn activo" onclick="cambiarTabAuth('login')">
+            Iniciar Sesión
+          </button>
+          <button type="button" id="tab-auth-btn-reg" class="auth-tab-btn" onclick="cambiarTabAuth('registro')">
+            Registrarse
+          </button>
+        </div>
+
+        <!-- Formulario Login -->
+        <form id="form-login">
+          <label for="login-cedula">Cédula de Identidad</label>
+          <input type="text" id="login-cedula" placeholder="7 u 8 dígitos (Ej. 12345678 o 20123456)" maxlength="8" required>
+          
+          <label for="login-pass">Contraseña</label>
+          <input type="password" id="login-pass" placeholder="Ingresa tu contraseña" maxlength="16" required>
+          
+          <button type="submit" class="btn" style="width:100%; margin-top:10px; font-size:1rem;">Ingresar a INEVAROLI</button>
+          
+          <p style="margin-top:14px; text-align:center; font-size:0.88rem;">
+            <a href="#" onclick="abrirRecuperarModal(); return false;" style="color:var(--gold-primary); text-decoration:underline;">¿Olvidaste tu contraseña?</a>
+          </p>
+        </form>
+
+        <!-- Formulario Registro de Cliente -->
+        <form id="form-registro" style="display:none;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div>
+              <label for="reg-nombre">Nombres</label>
+              <input type="text" id="reg-nombre" placeholder="Solo letras" maxlength="35" required>
+            </div>
+            <div>
+              <label for="reg-apellido">Apellidos</label>
+              <input type="text" id="reg-apellido" placeholder="Solo letras" maxlength="35" required>
+            </div>
+          </div>
+
+          <label for="reg-cedula">Cédula de Identidad</label>
+          <input type="text" id="reg-cedula" placeholder="7 u 8 dígitos numéricos" maxlength="8" required>
+
+          <label for="reg-telefono">Teléfono Móvil (+58)</label>
+          <div class="telefono-input-group">
+            <select id="reg-prefijo" class="select-prefijo" required>
+              <option value="0414">0414</option>
+              <option value="0424" selected>0424</option>
+              <option value="0412">0412</option>
+              <option value="0416">0416</option>
+              <option value="0426">0426</option>
+            </select>
+            <input type="tel" id="reg-telefono" class="input-telefono-resto" placeholder="Número (7 dígitos)" maxlength="7" required>
+          </div>
+
+          <label for="reg-email">Correo Electrónico</label>
+          <input type="email" id="reg-email" placeholder="usuario@correo.com" maxlength="50" required>
+
+          <label for="reg-pass">Contraseña (8 a 16 caracteres)</label>
+          <input type="password" id="reg-pass" placeholder="Mayúscula, minúscula, número y símbolo" maxlength="16" required>
+
+          <!-- Barra dinámica de fortaleza de contraseña -->
+          <div class="medidor-fuerza"><div id="barra-fuerza"></div></div>
+          <span id="texto-fuerza">Nivel de seguridad de la contraseña</span>
+
+          <label for="reg-pass-conf">Confirmar Contraseña</label>
+          <input type="password" id="reg-pass-conf" placeholder="Repite tu contraseña" maxlength="16" required>
+
+          <button type="submit" class="btn" style="width:100%; margin-top:10px;">Crear Mi Cuenta</button>
+        </form>
+
+        <!-- Formulario Recuperación de Contraseña -->
+        <form id="form-recuperar" style="display:none;">
+          <h4 style="color:var(--gold-light); margin-bottom:8px; font-size:1.1rem;">Recuperación Segura</h4>
+          <p style="font-size:0.86rem; color:var(--text-muted); margin-bottom:14px;">
+            Ingresa tu correo registrado para recibir instrucciones de restablecimiento.
+          </p>
+          <label for="recuperar-email">Correo Electrónico</label>
+          <input type="email" id="recuperar-email" placeholder="usuario@correo.com" required>
+          <button type="submit" class="btn" style="width:100%; margin-top:8px;">Enviar Instrucciones</button>
+          <p style="margin-top:14px; text-align:center; font-size:0.88rem;">
+            <a href="#" onclick="cambiarTabAuth('login'); return false;" style="color:var(--gold-primary);">← Volver al inicio de sesión</a>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Modal 2: Detalle y Ficha de la Joya ─── -->
+  <div id="modal-detalle" class="modal-fondo" style="display:none;">
+    <div class="modal-caja">
+      <button type="button" class="modal-cerrar" onclick="cerrarDetalleProducto()">×</button>
+      
+      <!-- Carrusel de fotos de la joya -->
+      <div class="modal-carrusel-wrap">
+        <div class="modal-carrusel-slide">
+          <img id="detalle-img" src="" alt="Ficha de joya">
+          <button type="button" id="modal-carrusel-prev" class="modal-carrusel-btn prev" onclick="moverDetalleCarrusel(-1)" aria-label="Foto anterior">‹</button>
+          <button type="button" id="modal-carrusel-next" class="modal-carrusel-btn next" onclick="moverDetalleCarrusel(1)" aria-label="Foto siguiente">›</button>
+          <span id="modal-carrusel-contador" class="modal-carrusel-badge">1 / 1</span>
+        </div>
+        <div id="modal-carrusel-thumbs" class="modal-carrusel-thumbs"></div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+        <div>
+          <span id="detalle-presentacion" style="color:var(--gold-primary); font-size:0.82rem; font-weight:700; text-transform:uppercase;"></span>
+          <h3 id="detalle-titulo" style="text-align:left; margin-bottom:6px; font-size:1.3rem;"></h3>
+        </div>
+        <div id="detalle-stock-badge"></div>
+      </div>
+
+      <p id="detalle-descripcion" style="font-size:0.9rem; line-height:1.5; color:var(--text-secondary); margin-bottom:14px;"></p>
+
+      <!-- Ficha de Especificaciones de Joyería -->
+      <div class="detalle-specs-grid">
+        <div><strong>Piedras / Gemas:</strong> <span id="detalle-piedras"></span></div>
+        <div><strong>Tallas Disponibles:</strong> <span id="detalle-tallas"></span></div>
+        <div><strong>Grabado Interior:</strong> <span style="color:#10b981;">Gratis incluido</span></div>
+        <div><strong>Estuche de Presentación:</strong> <span style="color:#10b981;">De pana incluido</span></div>
+      </div>
+
+      <!-- Campo Opcional de Personalización de Grabado -->
+      <div style="margin-bottom:14px;">
+        <label for="detalle-grabado-input" style="font-size:0.82rem; font-weight:700; color:var(--gold-light);">Inscripción o Grabado Personalizado (Opcional):</label>
+        <input type="text" id="detalle-grabado-input" placeholder="Ej: Lic. Mauricio C. / Boda 2026 / 15-10-26" maxlength="35">
+      </div>
+
+      <!-- Precios -->
+      <div id="detalle-descuento-badge" style="display:none; margin-bottom:6px;">
+        <span class="badge-descuento" id="detalle-descuento-txt"></span>
+      </div>
+      <div id="detalle-precio-tachado-box" style="display:none; font-size:0.88rem; color:var(--text-muted); text-decoration:line-through; margin-bottom:4px;">
+        <span id="detalle-precio-original"></span> · <span id="detalle-precio-original-bs"></span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:16px;">
+        <div>
+          <span style="font-size:0.85rem; color:var(--text-muted);">Precio Referencial:</span>
+          <div id="detalle-precio" style="font-size:1.6rem; font-weight:900; color:var(--gold-light);"></div>
+        </div>
+        <div style="text-align:right;">
+          <span style="font-size:0.85rem; color:var(--text-muted);">Tasa Oficial BCV:</span>
+          <div id="detalle-precio-bs" style="font-size:1.2rem; font-weight:800; color:#f59e0b;"></div>
+        </div>
+      </div>
+
+      <button type="button" id="detalle-btn-add" class="btn" style="width:100%;">Añadir al Pedido</button>
+    </div>
+  </div>
+
+  <!-- ─── Modal 3: Guía de Tallas de Anillos ─── -->
+  <div id="modal-guia-tallas" class="modal-fondo" style="display:none;">
+    <div class="modal-caja">
+      <button type="button" class="modal-cerrar" onclick="cerrarGuiaTallasModal()">×</button>
+      <h3>Guía Oficial de Tallas de Anillos</h3>
+      <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:14px; text-align:center;">
+        Para anillos de grado y alianzas matrimoniales, puedes medir el diámetro interno de un anillo que te quede bien en milímetros.
+      </p>
+      
+      <div class="tabla-admin-wrap" style="margin-bottom:14px;">
+        <table class="tabla-admin" style="font-size:0.85rem;">
+          <thead>
+            <tr>
+              <th>Talla (US/Vzla)</th>
+              <th>Diámetro Interno (mm)</th>
+              <th>Circunferencia (mm)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Talla 5</strong></td><td>15.7 mm</td><td>49.3 mm</td></tr>
+            <tr><td><strong>Talla 6</strong></td><td>16.5 mm</td><td>51.8 mm</td></tr>
+            <tr><td><strong>Talla 7</strong></td><td>17.3 mm</td><td>54.4 mm</td></tr>
+            <tr><td><strong>Talla 8</strong></td><td>18.1 mm</td><td>56.9 mm</td></tr>
+            <tr><td><strong>Talla 9</strong></td><td>18.9 mm</td><td>59.5 mm</td></tr>
+            <tr><td><strong>Talla 10</strong></td><td>19.8 mm</td><td>62.1 mm</td></tr>
+            <tr><td><strong>Talla 11</strong></td><td>20.6 mm</td><td>64.6 mm</td></tr>
+            <tr><td><strong>Talla 12</strong></td><td>21.4 mm</td><td>67.2 mm</td></tr>
+            <tr><td><strong>Talla 13</strong></td><td>22.2 mm</td><td>69.7 mm</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p style="font-size:0.82rem; color:var(--gold-light); text-align:center;">
+        * Si estás en Valencia, también puedes visitarnos en CC Gran Bazar para medir tu dedo con anillero profesional sin costo.
+      </p>
+    </div>
+  </div>
+
+  <!-- ─── Modal 4: Lista de Joyas Favoritas ─── -->
+  <div id="modal-favoritos" class="modal-fondo" style="display:none;">
+    <div class="modal-caja">
+      <button type="button" class="modal-cerrar" onclick="document.getElementById('modal-favoritos').style.display='none'">×</button>
+      <div id="contenido-modal-favoritos"></div>
+    </div>
+  </div>
+
+  <!-- ─── Modal 5: Historial de Pedidos ─── -->
+  <div id="modal-pedidos" class="modal-fondo" style="display:none;">
+    <div class="modal-caja" style="max-width:620px;">
+      <button type="button" class="modal-cerrar" onclick="document.getElementById('modal-pedidos').style.display='none'">×</button>
+      <div id="contenido-modal-pedidos"></div>
+    </div>
+  </div>
+
+  <!-- ─── Modal 6: Configuración de Perfil ─── -->
+  <div id="modal-perfil" class="modal-fondo" style="display:none;">
+    <div class="modal-caja">
+      <button type="button" class="modal-cerrar" onclick="cerrarPerfilModal()">×</button>
+      <h3>Mi Perfil de Usuario</h3>
+      <form id="form-perfil">
+        <label for="perfil-nombre">Nombres</label>
+        <input type="text" id="perfil-nombre" maxlength="35" required>
+        
+        <label for="perfil-apellido">Apellidos</label>
+        <input type="text" id="perfil-apellido" maxlength="35" required>
+        
+        <label for="perfil-telefono">Teléfono Móvil (+58)</label>
+        <div class="telefono-input-group">
+          <select id="perfil-prefijo" class="select-prefijo" required>
+            <option value="0414">0414</option>
+            <option value="0424">0424</option>
+            <option value="0412">0412</option>
+            <option value="0416">0416</option>
+            <option value="0426">0426</option>
+          </select>
+          <input type="tel" id="perfil-telefono" class="input-telefono-resto" maxlength="7" required>
+        </div>
+
+        <hr style="border:none; border-top:1px solid rgba(255,255,255,0.08); margin:16px 0;">
+        <span style="font-size:0.85rem; font-weight:700; color:var(--gold-light);">Cambiar Contraseña (Opcional):</span>
+        
+        <label for="perfil-pass-actual">Contraseña Actual</label>
+        <input type="password" id="perfil-pass-actual" placeholder="Tu clave actual" maxlength="16">
+        
+        <label for="perfil-pass-nueva">Nueva Contraseña (8 a 16 caracteres)</label>
+        <input type="password" id="perfil-pass-nueva" placeholder="Nueva clave segura" maxlength="16">
+
+        <button type="submit" class="btn" style="width:100%; margin-top:8px;">Guardar Cambios</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ─── Drawer Lateral del Carrito de Joyería ─── -->
+  <div id="cart-overlay" class="cart-overlay" onclick="cerrarDrawerCarrito()"></div>
+  <aside id="cart-drawer" class="cart-drawer" aria-label="Carrito de Compras">
+    <div class="cart-drawer-header">
+      <div class="cart-drawer-title">
+        Tu Pedido de Joyería
+      </div>
+      <button type="button" class="modal-cerrar" style="position:static;" onclick="cerrarDrawerCarrito()">×</button>
+    </div>
+
+    <div class="cart-drawer-body" id="cart-items-container">
+      <!-- Se inyectan las filas de productos -->
+    </div>
+
+    <div class="cart-drawer-footer">
+      <div class="cart-subtotal-row">
+        <span style="color:var(--text-muted); font-size:0.9rem;">Subtotal USD:</span>
+        <strong id="cart-subtotal-usd" style="color:var(--gold-light); font-size:1.25rem;">$0.00</strong>
+      </div>
+      <div class="cart-subtotal-row" style="margin-bottom:14px;">
+        <span style="color:var(--text-muted); font-size:0.85rem;">Equivalente BCV:</span>
+        <strong id="cart-subtotal-bs" style="color:#f59e0b; font-size:1.05rem;">Bs. 0,00</strong>
+      </div>
+      <button type="button" id="cart-checkout-btn" class="btn" style="width:100%; font-size:1rem;" onclick="Checkout.abrirModal()">
+        Proceder a Confirmar Compra
+      </button>
+    </div>
+  </aside>
+
+  <!-- ─── Modal 7: Checkout Multi-Paso de Joyería ─── -->
+  <div id="modal-checkout" class="modal-fondo" style="display:none;">
+    <div class="modal-caja checkout-modal-caja">
+      <button type="button" class="modal-cerrar" onclick="Checkout.cerrarModal()">×</button>
+      <h3>Confirmación de Pedido</h3>
+
+      <!-- Barra de Pasos -->
+      <div class="checkout-steps-bar">
+        <div id="checkout-step-pill-1" class="checkout-step-pill activo">1. Resumen</div>
+        <div id="checkout-step-pill-2" class="checkout-step-pill">2. Despacho</div>
+        <div id="checkout-step-pill-3" class="checkout-step-pill">3. Pago</div>
+        <div id="checkout-step-pill-4" class="checkout-step-pill">4. Confirmar</div>
+      </div>
+
+      <!-- Panel Paso 1: Resumen -->
+      <div id="checkout-panel-paso-1">
+        <h4 style="color:var(--gold-light); margin-bottom:10px;">Detalle de Joyas Ordenadas</h4>
+        <div id="checkout-resumen-items" style="max-height:220px; overflow-y:auto; margin-bottom:12px;"></div>
+        <div style="border-top:1px solid rgba(255,255,255,0.08); padding-top:10px; margin-bottom:16px;">
+          <div style="display:flex; justify-content:space-between; font-size:1.1rem; font-weight:800;">
+            <span>Total USD:</span>
+            <span id="checkout-resumen-total-usd" style="color:var(--gold-light);">$0.00</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:700; color:#f59e0b;">
+            <span>Equivalente BCV:</span>
+            <span id="checkout-resumen-total-bs">Bs. 0,00</span>
+          </div>
+        </div>
+        <button type="button" class="btn" style="width:100%;" onclick="Checkout.irAPaso(2)">Continuar a Despacho →</button>
+      </div>
+
+      <!-- Panel Paso 2: Despacho / Retiro -->
+      <div id="checkout-panel-paso-2" style="display:none;">
+        <h4 style="color:var(--gold-light); margin-bottom:10px;">Modalidad de Entrega</h4>
+
+        <div style="display:flex; gap:16px; margin-bottom:14px; background:#0b0f19; padding:12px; border-radius:var(--radius-sm); border:1px solid var(--border-gold);">
+          <label style="cursor:pointer; display:flex; align-items:center; gap:6px; margin:0;">
+            <input type="radio" name="checkout_tipo_despacho" value="tienda" checked> Retiro en Tienda Gran Bazar Valencia
+          </label>
+          <label style="cursor:pointer; display:flex; align-items:center; gap:6px; margin:0;">
+            <input type="radio" name="checkout_tipo_despacho" value="envio"> Envío Nacional (MRW / Zoom / Tealca)
+          </label>
+        </div>
+
+        <label for="checkout-nombre">Nombre y Apellido del Destinatario</label>
+        <input type="text" id="checkout-nombre" required>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label for="checkout-cedula">Cédula de Identidad</label>
+            <input type="text" id="checkout-cedula" maxlength="8" required>
+          </div>
+          <div>
+            <label for="checkout-telefono">Teléfono de Contacto</label>
+            <input type="tel" id="checkout-telefono" required>
+          </div>
+        </div>
+
+        <!-- Campos adicionales si selecciona Envío Nacional -->
+        <div id="checkout-campos-envio-nacional" style="display:none;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div>
+              <label for="checkout-estado-vzla">Estado</label>
+              <select id="checkout-estado-vzla">
+                <option value="Carabobo">Carabobo</option>
+                <option value="Distrito Capital">Distrito Capital</option>
+                <option value="Miranda">Miranda</option>
+                <option value="Aragua">Aragua</option>
+                <option value="Zulia">Zulia</option>
+                <option value="Lara">Lara</option>
+                <option value="Anzoátegui">Anzoátegui</option>
+                <option value="Bolívar">Bolívar</option>
+                <option value="Táchira">Táchira</option>
+                <option value="Mérida">Mérida</option>
+                <option value="Falcón">Falcón</option>
+                <option value="Monagas">Monagas</option>
+                <option value="Nueva Esparta">Nueva Esparta</option>
+                <option value="Yaracuy">Yaracuy</option>
+                <option value="Barinas">Barinas</option>
+                <option value="Portuguesa">Portuguesa</option>
+                <option value="Sucre">Sucre</option>
+                <option value="Trujillo">Trujillo</option>
+                <option value="Guárico">Guárico</option>
+                <option value="Cojedes">Cojedes</option>
+                <option value="Apure">Apure</option>
+                <option value="Amazonas">Amazonas</option>
+                <option value="Delta Amacuro">Delta Amacuro</option>
+                <option value="La Guaira">La Guaira</option>
+              </select>
+            </div>
+            <div>
+              <label for="checkout-ciudad">Ciudad / Municipio</label>
+              <input type="text" id="checkout-ciudad" placeholder="Ej. Valencia, Caracas...">
+            </div>
+          </div>
+
+          <label for="checkout-agencia">Empresa de Encomienda</label>
+          <select id="checkout-agencia">
+            <option value="MRW">MRW (Cobro en Destino o Prepago)</option>
+            <option value="Zoom">Zoom Asegurado</option>
+            <option value="Tealca">Tealca</option>
+            <option value="Domesa">Domesa</option>
+          </select>
+
+          <label for="checkout-direccion">Dirección Exacta o Código de Agencia Receptora</label>
+          <textarea id="checkout-direccion" rows="2" placeholder="Indica nombre y código de la oficina MRW/Zoom o dirección exacta a domicilio..."></textarea>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:14px;">
+          <button type="button" class="btn btn-detalle" onclick="Checkout.irAPaso(1)">← Volver</button>
+          <button type="button" class="btn" style="flex:1;" onclick="Checkout.validarPaso2()">Continuar al Pago →</button>
+        </div>
+      </div>
+
+      <!-- Panel Paso 3: Métodos de Pago -->
+      <div id="checkout-panel-paso-3" style="display:none;">
+        <h4 style="color:var(--gold-light); margin-bottom:10px;">Selecciona el Método de Pago</h4>
+
+        <label for="checkout-select-pago">Canal de Pago</label>
+        <select id="checkout-select-pago">
+          <option value="pago_movil">Pago Móvil (Tasa Oficial BCV)</option>
+          <option value="transferencia">Transferencia Bancaria Nacional (Banesco / BDV)</option>
+          <option value="efectivo">Efectivo en Tienda / Contra Entrega (USD o Bs)</option>
+        </select>
+
+        <div id="checkout-datos-pago-box"></div>
+
+        <div style="background:rgba(212,175,55,0.08); border:1px dashed var(--border-gold); padding:12px; border-radius:var(--radius-sm); margin-top:14px; text-align:center;">
+          <p style="font-size:0.86rem; color:var(--text-secondary); margin:0;">
+            💬 <strong>Validación de Pago Directa:</strong> No requerimos número de comprobante aquí. Al confirmar tu orden, coordinarás y enviarás la captura o comprobante de tu pago directamente con el asesor comercial a través de WhatsApp.
+          </p>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:16px;">
+          <button type="button" class="btn btn-detalle" onclick="Checkout.irAPaso(2)">← Volver</button>
+          <button type="button" class="btn" style="flex:1;" onclick="Checkout.validarPaso3()">Revisar Confirmación →</button>
+        </div>
+      </div>
+
+      <!-- Panel Paso 4: Confirmación Final y WhatsApp -->
+      <div id="checkout-panel-paso-4" style="display:none;">
+        <div id="checkout-confirmacion-box"></div>
+
+        <div style="display:flex; gap:10px; margin-top:16px;">
+          <button type="button" class="btn btn-detalle" onclick="Checkout.irAPaso(3)">← Modificar</button>
+          <button type="button" class="btn" style="flex:1; background:#25d366; color:#000; font-size:1rem;" onclick="Checkout.procesarOrdenFinal()">
+            <img src="icons/whatsapp.png" alt="" class="ui-icon"> Confirmar y Enviar por WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Modal 8: Panel de Administración (Gestión de Joyas, Stock & Pedidos) ─── -->
+  <div id="modal-admin" class="modal-fondo" style="display:none;">
+    <div class="modal-caja admin-modal-caja">
+      <button type="button" class="modal-cerrar" onclick="cerrarAdminModal()">×</button>
+      <h3 style="text-align:left; color:var(--gold-light); margin-bottom:14px;">Panel de Administración — INEVAROLI Joyería</h3>
+
+      <!-- Pestañas del Panel Admin -->
+      <div class="admin-tabs">
+        <button type="button" id="tab-admin-productos" class="admin-tab-btn activo" onclick="cambiarSeccionAdmin('productos')">
+          Inventario de Joyas & Stock
+        </button>
+        <button type="button" id="tab-admin-categorias" class="admin-tab-btn" onclick="cambiarSeccionAdmin('categorias')">
+          Gestión de Categorías
+        </button>
+        <button type="button" id="tab-admin-pedidos" class="admin-tab-btn" onclick="cambiarSeccionAdmin('pedidos')">
+          Pedidos de Clientes
+        </button>
+        <button type="button" id="tab-admin-basedatos" class="admin-tab-btn" onclick="cambiarSeccionAdmin('basedatos')">
+          📁 Base de Datos (.sql)
+        </button>
+      </div>
+
+      <!-- Sección 1: Inventario de Joyas -->
+      <div id="admin-sec-productos">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
+          <span style="font-size:0.88rem; color:var(--text-muted);">
+            Gestiona precios, añade stock con un clic y registra nuevas piezas para el catálogo.
+          </span>
+          <button type="button" class="btn btn-sm" onclick="abrirFormularioProductoModal()">
+            + Registrar Nueva Joya
+          </button>
+        </div>
+
+        <div class="admin-barra-busqueda-wrap">
+          <input type="text" id="admin-buscar-producto" class="admin-input-busqueda" placeholder="Buscar joya por nombre, material o ID (#)..." oninput="filtrarAdminProductos(this.value)">
+        </div>
+
+        <div class="tabla-admin-wrap">
+          <table class="tabla-admin">
+            <thead>
+              <tr>
+                <th style="width:50px;">ID</th>
+                <th>Joya & Colección</th>
+                <th>Precio USD</th>
+                <th>Destacado</th>
+                <th>Stock</th>
+                <th>Estado</th>
+                <th style="min-width:180px;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="admin-tabla-cuerpo"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Sección 2: Gestión de Categorías -->
+      <div id="admin-sec-categorias" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <span style="font-size:0.88rem; color:var(--text-muted);">Grupos y colecciones de joyería (Grado, Bodas, Acero, etc.)</span>
+          <button type="button" class="btn btn-sm" onclick="agregarCategoriaPrompt()">+ Nueva Categoría</button>
+        </div>
+
+        <div class="admin-barra-busqueda-wrap">
+          <input type="text" id="admin-buscar-categoria" class="admin-input-busqueda" placeholder="Buscar categoría por nombre o ID..." oninput="filtrarAdminCategorias(this.value)">
+        </div>
+
+        <div class="tabla-admin-wrap">
+          <table class="tabla-admin">
+            <thead>
+              <tr>
+                <th style="width:60px;">ID</th>
+                <th>Nombre de Categoría</th>
+                <th>Piezas Asociadas</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="admin-tabla-categorias"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Sección 3: Pedidos de Clientes -->
+      <div id="admin-sec-pedidos" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <span style="font-size:0.88rem; color:var(--text-muted);">Seguimiento y control de entrega de órdenes</span>
+        </div>
+
+        <div class="admin-barra-busqueda-wrap" style="display:flex; gap:10px; flex-wrap:wrap;">
+          <div style="flex:2; min-width:240px;">
+            <input type="text" id="admin-buscar-pedido" class="admin-input-busqueda" placeholder="Buscar por ID, cliente, cédula o teléfono..." oninput="filtrarAdminPedidosTexto(this.value)">
+          </div>
+          <div style="flex:1; min-width:160px;">
+            <select id="admin-filtro-estado-pedido" class="admin-select-filtro" onchange="filtrarAdminPedidosEstado(this.value)">
+              <option value="todos">Todos los Estados</option>
+              <option value="recibido">Recibido</option>
+              <option value="preparacion">En Taller / Ajuste</option>
+              <option value="camino">Listo / En Camino</option>
+              <option value="entregado">Entregado</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="admin-pedidos-lista"></div>
+      </div>
+
+      <!-- Sección 4: Gestión y Reactividad de Base de Datos (.sql) -->
+      <div id="admin-sec-basedatos" style="display:none;">
+        <div style="background:var(--bg-surface); padding:20px; border-radius:var(--radius-md); border:1px solid var(--border-gold); margin-bottom:16px;">
+          <h4 style="color:var(--gold-light); margin-bottom:8px; font-size:1.1rem; display:flex; align-items:center; gap:8px;">
+            <span>📁 Sincronización Directa de Base de Datos SQL</span>
+          </h4>
+          <p style="font-size:0.88rem; color:var(--text-secondary); line-height:1.5; margin-bottom:14px;">
+            El sistema opera con el esquema relacional <code style="background:rgba(0,0,0,0.15); padding:2px 6px; border-radius:4px; color:var(--gold-primary);">database/schema.sql</code>. Si el archivo no existe o se vacía, los productos desaparecen del catálogo; al volver a cargarlo, reaparecen de inmediato.
+          </p>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px;">
+            <!-- Opción A: Cargar archivo .sql desde el equipo -->
+            <div style="background:var(--bg-secondary); border:1px dashed var(--border-gold); padding:16px; border-radius:var(--radius-sm); text-align:center;">
+              <strong style="color:var(--text-primary); display:block; margin-bottom:6px; font-size:0.95rem;">📥 Cargar archivo schema.sql</strong>
+              <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">Selecciona el archivo .sql de tu computadora para restaurar o actualizar todos los productos al instante:</p>
+              <input type="file" id="admin-input-sql-file" accept=".sql" style="display:none;" onchange="procesarArchivoSQLAdmin(event)">
+              <button type="button" class="btn btn-sm" onclick="document.getElementById('admin-input-sql-file').click()" style="width:100%;">
+                📂 Elegir archivo .sql
+              </button>
+            </div>
+
+            <!-- Opción B: Sincronización automática o vaciado de prueba -->
+            <div style="background:var(--bg-secondary); border:1px dashed var(--border-gold); padding:16px; border-radius:var(--radius-sm); display:flex; flex-direction:column; justify-content:space-between; gap:10px;">
+              <div>
+                <strong style="color:var(--text-primary); display:block; margin-bottom:6px; font-size:0.95rem;">⚡ Acciones Rápidas</strong>
+                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">Prueba la reactividad del catálogo en vivo:</p>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <button type="button" class="btn btn-sm btn-detalle" onclick="recargarCatalogoDesdeServidorSQL()" style="width:100%;">
+                  🔄 Recargar database/schema.sql
+                </button>
+                <button type="button" class="btn btn-sm btn-rojo" onclick="simularBorradoBaseDeDatos()" style="width:100%;">
+                  🗑️ Simular Borrado (Vaciar Productos)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div id="admin-sql-resultado" style="margin-top:14px; font-size:0.86rem; padding:10px 14px; border-radius:var(--radius-sm); display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Modal 9: Registrar / Editar Joya (Admin) ─── -->
+  <div id="modal-producto-form" class="modal-fondo" style="display:none; z-index:2200;">
+    <div class="modal-caja" style="max-width:600px;">
+      <button type="button" class="modal-cerrar" onclick="cerrarFormularioProductoModal()">×</button>
+      <h3 id="form-prod-titulo">Registrar Nueva Joya</h3>
+
+      <form id="form-producto-admin">
+        <input type="hidden" id="form-prod-id">
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label for="form-prod-nombre">Nombre de la Joya</label>
+            <input type="text" id="form-prod-nombre" placeholder="Ej. Anillo de Grado Bachiller" maxlength="70" required>
+          </div>
+          <div>
+            <label for="form-prod-pres">Material / Acabado</label>
+            <input type="text" id="form-prod-pres" placeholder="Ej. Plata Ley 925 / Acero 316L" maxlength="60" required>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+          <div>
+            <label for="form-prod-cat">Categoría</label>
+            <select id="form-prod-cat" required></select>
+          </div>
+          <div>
+            <label for="form-prod-precio">Precio USD ($)</label>
+            <input type="number" id="form-prod-precio" step="0.01" min="0.01" placeholder="35.00" required>
+          </div>
+          <div>
+            <label for="form-prod-stock">Stock Inicial</label>
+            <input type="number" id="form-prod-stock" min="0" value="15" required>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label for="form-prod-tallas">Tallas / Medidas</label>
+            <input type="text" id="form-prod-tallas" placeholder="Ej. 6 a la 11 / Ajustable">
+          </div>
+          <div>
+            <label for="form-prod-piedras">Gemas / Piedras</label>
+            <input type="text" id="form-prod-piedras" placeholder="Ej. Circonia Suiza Azul">
+          </div>
+          <input type="hidden" id="form-prod-descuento" value="0">
+        </div>
+
+        <label for="form-prod-desc">Descripción Detallada</label>
+        <textarea id="form-prod-desc" rows="3" placeholder="Detalles de la joya, grabado, estuche..."></textarea>
+
+        <div style="margin:8px 0;">
+          <label style="cursor:pointer; display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="form-prod-recomendado"> Destacar en el carrusel de recomendados
+          </label>
+        </div>
+
+        <!-- Carga de Imagen de la Joya -->
+        <label>Fotografía de la Joya</label>
+        <div style="display:flex; gap:10px; margin-bottom:8px;">
+          <input type="text" id="form-prod-url" placeholder="URL directa de la imagen (o selecciona archivo)" style="margin-bottom:0;">
+        </div>
+        <input type="file" id="form-prod-file" accept="image/*" style="font-size:0.85rem; color:var(--text-muted); margin-bottom:10px;">
+
+        <div style="width:100%; height:120px; background:#080d18; border:1px dashed var(--border-gold); border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; overflow:hidden; margin-bottom:14px;">
+          <img id="form-prod-preview" src="" alt="Previsualización" style="max-height:100%; max-width:100%; object-fit:contain; display:none;">
+          <span id="form-prod-preview-text" style="color:var(--text-muted); font-size:0.82rem;">Vista previa de la joya</span>
+        </div>
+
+        <button type="submit" class="btn" style="width:100%;">Guardar Joya en el Inventario</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SCRIPTS MODULARES (CERO DEPENDENCIAS EXTERNAS)
+       ══════════════════════════════════════════════════ -->
+  <script src="js/config.js"></script>
+  <script src="js/notificaciones.js"></script>
+  <script src="js/productos.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/seguridad.js"></script>
+  <script src="js/validaciones.js"></script>
+  <script src="js/bloqueo.js"></script>
+  <script src="js/motor-sql.js"></script>
+  <script src="js/tasa-bcv.js"></script>
+  <script src="js/favoritos.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/detalle-producto.js"></script>
+  <script src="js/carrusel-inicio.js"></script>
+  <script src="js/checkout.js"></script>
+  <script src="js/pedidos.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
