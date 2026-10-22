@@ -10,15 +10,23 @@ Diseñado y optimizado para ejecutarse **100% de manera local y sin dependencias
 
 ## 🚀 Cómo ejecutar el proyecto
 
-1. Navegar a la carpeta `INVERANOLI/public`.
-2. Hacer **doble clic en `index.html`** (o clic derecho > *Abrir con* > Tu navegador web favorito: Chrome, Edge, Firefox).
-3. **¡Listo!** No requiere instalar Node.js, npm, Python, bases de datos externas (MySQL/PostgreSQL) ni levantar servidores locales.
+### Opción 1: Servidor Integrado en Python (¡Recomendado para presentaciones!)
+**100% libre de Node.js, npm o pip.** Funciona con cualquier versión de Python (Python 2.7 o Python 3.x) en **Windows 7, 8, 10 u 11** sin permisos de administrador:
+1. Haz doble clic en el archivo: **`iniciar_servidor_python.bat`** (o ejecuta en terminal `python servidor_completo.py`).
+2. Se levantará automáticamente:
+   - 🌐 **Web:** `http://localhost:3000` (se abrirá en tu navegador de inmediato).
+   - 🗄️ **Base de Datos:** `http://localhost:3001/api/database` vinculada en tiempo real con `database/schema.sql`.
 
-> **Modo Servidor Opcional:** Si deseas ejecutarlo mediante un servidor local liviano, abre una terminal en la carpeta `INVERANOLI` y ejecuta:
-> ```bash
-> npm start
-> ```
-> Y abre en tu navegador: `http://localhost:3000`
+### Opción 2: Sin servidores (Doble Clic Directo en HTML)
+1. Navegar a la carpeta `INVERANOLI/public`.
+2. Hacer **doble clic en `index.html`** (o clic derecho > *Abrir con* > Navegador).
+3. **¡Listo!** No requiere instalar nada ni tener permisos especiales.
+
+### Opción 3: Modo Node.js (Si está instalado)
+Si en el equipo tienes Node.js, puedes hacer doble clic en `iniciar_servidor_bd.bat` o ejecutar:
+```bash
+npm start
+```
 
 ---
 

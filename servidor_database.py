@@ -1,0 +1,287 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+servidor_database.py — Servidor Dedicado de Base de Datos y Web para INVERANOLI
+Compatible con Python 2.7 y Python 3.x (cualquier version de Python en Windows 7 / 8 / 10 / 11 / Linux).
+Cero dependencias externas (usa unicamente modulos nativos de la libreria estandar).
+No requiere permisos de administrador.
+
+Puertos:
+- 3001: API de Base de Datos Relacional (/api/database, /api/productos, /api/estado)
+- 3000: Servidor web opcional de la pagina estatica (/public) si se desea abrir via http://localhost:3000
+"""
+
+import os
+import sys
+import json
+import re
+
+# Compatibilidad transparente Python 2 y Python 3
+if sys.version_info[0] >= 3:
+    from http.server import HTTPServer, BaseHTTPRequestHandler
+    from urllib.parse import urlparse
+else:
+    from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
+    from urlparse import urlparse
+
+PORT_DB = 3001
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SCHEMA_PATH = os.path.join(BASE_DIR, 'database', 'schema.sql')
+PUBLIC_DIR = os.path.join(BASE_DIR, 'public')
+
+
+def limpiar_valor_sql(val):
+    v = val.strip()
+    if (v.startswith("'") and v.endswith("'")) or (v.startswith('"') and v.endswith('"')):
+        v = v[1:-1].replace("''", "'")
+    u = v.upper()
+    if u == 'NULL':
+        return None
+    if u == 'TRUE':
+        return 1
+    if u == 'FALSE':
+        return 0
+    if re.match(r'^-?\d+$', v):
+        try:
+            return int(v)
+        except Exception:
+            return v
+    if re.match(r'^-?\d+\.\d+$', v):
+        try:
+            return float(v)
+        except Exception:
+            return v
+    return v
+
+
+def parsear_valores_sql(cadena_valores):
+    valores = []
+    actual = []
+    en_comillas = False
+    i = 0
+    n = len(cadena_valores)
+
+    while i < n:
+        c = cadena_valores[i]
+        if c == "'":
+            if en_comillas and (i + 1 < n) and cadena_valores[i + 1] == "'":
+                actual.append("'")
+                i += 1
+            else:
+                en_comillas = not en_comillas
+        elif c == ',' and not en_comillas:
+            valores.append(limpiar_valor_sql(''.join(actual)))
+            actual = []
+        else:
+            actual.append(c)
+        i += 1
+
+    resto = ''.join(actual).strip()
+    if resto or len(valores) > 0:
+        valores.append(limpiar_valor_sql(''.join(actual)))
+
+    return valores
+
+
+def leer_datos_desde_sql():
+    if not os.path.exists(SCHEMA_PATH):
+        return {
+            'disponible': False,
+            'mensaje': 'El archivo database/schema.sql no existe.',
+            'categorias': [],
+            'productos': []
+        }
+
+    try:
+        if sys.version_info[0] >= 3:
+            with open(SCHEMA_PATH, 'r', encoding='utf-8', errors='replace') as f:
+                lineas = f.readlines()
+        else:
+            with open(SCHEMA_PATH, 'r') as f:
+                lineas = f.readlines()
+    except Exception as e:
+        return {
+            'disponible': False,
+            'mensaje': 'Error leyendo schema.sql: ' + str(e),
+            'categorias': [],
+            'productos': []
+        }
+
+    categorias = []
+    productos = []
+
+    patron_cat = re.compile(r'INSERT\s+(?:OR\s+IGNORE\s+)?INTO\s+categorias\s*\(([^)]+)\)\s*VALUES\s*\((.*)\);?', re.IGNORECASE)
+    patron_prod = re.compile(r'INSERT\s+(?:OR\s+IGNORE\s+)?INTO\s+productos\s*\(([^)]+)\)\s*VALUES\s*\((.*)\);?', re.IGNORECASE)
+
+    for linea in lineas:
+        l = linea.strip()
+        if not l or l.startswith('--'):
+            continue
+
+        m_cat = patron_cat.match(l)
+        if m_cat:
+            cols = [c.strip() for c in m_cat.group(1).split(',')]
+            vals = parsear_valores_sql(m_cat.group(2))
+            reg = {}
+            for idx, col in enumerate(cols):
+                if idx < len(vals):
+                    reg[col] = vals[idx]
+            if reg.get('id') and reg.get('nombre'):
+                categorias.append(reg)
+            continue
+
+        m_prod = patron_prod.match(l)
+        if m_prod:
+            cols = [c.strip() for c in m_prod.group(1).split(',')]
+            vals = parsear_valores_sql(m_prod.group(2))
+            reg = {}
+            for idx, col in enumerate(cols):
+                val = vals[idx] if idx < len(vals) else None
+                if col == 'imagenes' and isinstance(val, (str, bytes)):
+                    try:
+                        val = json.loads(val)
+                    except Exception:
+                        val = [val]
+                reg[col] = val
+            if reg.get('id') and reg.get('nombre'):
+                productos.append(reg)
+
+    return {
+        'disponible': True,
+        'total_productos': len(productos),
+        'total_categorias': len(categorias),
+        'categorias': categorias,
+        'productos': productos
+    }
+
+
+class ManejadorBD(BaseHTTPRequestHandler):
+    def log_message(self, format, *args):
+        # Mantiene la consola limpia y elegante
+        sys.stderr.write("[%s] %s\n" % (self.log_date_time_string(), format % args))
+
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        self.end_headers()
+
+    def responder_json(self, status, objeto):
+        cuerpo = json.dumps(objeto, ensure_ascii=False).encode('utf-8')
+        self.send_response(status)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Content-Length', str(len(cuerpo)))
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        self.end_headers()
+        self.wfile.write(cuerpo)
+
+    def do_GET(self):
+        parsed = urlparse(self.path)
+        ruta = parsed.path
+
+        # 1. API Estado
+        if ruta in ('/api/estado', '/estado'):
+            datos = leer_datos_desde_sql()
+            res = {
+                'servidor_activo': True,
+                'servidor_motor': 'Python nativo (sin dependencias)',
+                'base_de_datos': 'conectada' if datos.get('disponible') else 'archivo_sql_no_encontrado',
+                'archivo_sql': SCHEMA_PATH,
+                'productos_cargados': len(datos.get('productos', [])),
+                'total_categorias': len(datos.get('categorias', []))
+            }
+            return self.responder_json(200, res)
+
+        # 2. API Solo Productos
+        if ruta in ('/api/productos', '/productos'):
+            datos = leer_datos_desde_sql()
+            return self.responder_json(200, datos.get('productos', []))
+
+        # 3. API Base de Datos Completa (para frontend INVERANOLI)
+        if ruta in ('/api/database', '/database', '/api/db'):
+            datos = leer_datos_desde_sql()
+            return self.responder_json(200, datos)
+
+        # 4. Pantalla de bienvenida / Dashboard informativo
+        if ruta in ('/', ''):
+            datos = leer_datos_desde_sql()
+            total_prods = len(datos.get('productos', []))
+            total_cats = len(datos.get('categorias', []))
+            disponible = datos.get('disponible', False)
+
+            html = u"""<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Servidor de Base de Datos Python — INVERANOLI</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b0f19; color: #f8fafc; padding: 40px 20px; text-align: center; }
+    .card { background: #182238; border: 1px solid #d4af37; border-radius: 12px; max-width: 620px; margin: 0 auto; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    h1 { color: #d4af37; font-size: 1.5rem; margin-bottom: 10px; }
+    .badge { display: inline-block; background: #10b981; color: white; padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; margin-bottom: 20px; }
+    .info { background: #101726; padding: 15px; border-radius: 8px; text-align: left; font-size: 0.9rem; color: #cbd5e1; line-height: 1.6; }
+    code { color: #f59e0b; font-family: monospace; }
+    .footer-note { margin-top: 20px; font-size: 0.85rem; color: #94a3b8; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>✦ SERVIDOR PYTHON DE BASE DE DATOS INVERANOLI ✦</h1>
+    <div class="badge">● SERVIDOR PYTHON ACTIVO EN PUERTO %d</div>
+    <div class="info">
+      <p><strong>Estado:</strong> %s</p>
+      <p><strong>Motor:</strong> Python nativo universal (Sin dependencias externas ni pip)</p>
+      <p><strong>Total Joyas:</strong> %d productos</p>
+      <p><strong>Total Categorías:</strong> %d categorías</p>
+      <p><strong>Endpoint API:</strong> <code>http://localhost:%d/api/database</code></p>
+    </div>
+    <p class="footer-note">
+      Compatible con Windows 7, 8, 10, 11 y navegadores ligeros.<br>
+      Puedes abrir <code>public/index.html</code> con doble clic o en tu navegador favorito.
+    </p>
+  </div>
+</body>
+</html>""" % (
+                PORT_DB,
+                u"✓ Base de datos vinculada con éxito" if disponible else u"⚠️ Archivo database/schema.sql ausente",
+                total_prods,
+                total_cats,
+                PORT_DB
+            )
+            cuerpo = html.encode('utf-8')
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html; charset=utf-8')
+            self.send_header('Content-Length', str(len(cuerpo)))
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(cuerpo)
+            return
+
+        # 404
+        self.responder_json(404, {'error': 'Ruta no encontrada'})
+
+
+def ejecutar():
+    servidor = HTTPServer(('0.0.0.0', PORT_DB), ManejadorBD)
+    print("========================================================")
+    print("💎 INVERANOLI — SERVIDOR PYTHON DE BASE DE DATOS")
+    print("========================================================")
+    print("✓ Servidor Python activo en: http://localhost:%d" % PORT_DB)
+    print("✓ Endpoint API de BD:       http://localhost:%d/api/database" % PORT_DB)
+    print("✓ Compatible con Windows 7 en adelante (Cero dependencias)")
+    print("✓ No requiere permisos de administrador ni paquetes pip")
+    print("--------------------------------------------------------")
+    print("Presiona Ctrl+C para detener el servidor.")
+    print("========================================================\n")
+    try:
+        servidor.serve_forever()
+    except KeyboardInterrupt:
+        print("\nServidor detenido correctamente.")
+        servidor.server_close()
+
+
+if __name__ == '__main__':
+    ejecutar()
