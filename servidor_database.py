@@ -1,20 +1,28 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-servidor_database.py — Servidor Dedicado de Base de Datos y Web para INVERANOLI
-Compatible con Python 2.7 y Python 3.x (cualquier version de Python en Windows 7 / 8 / 10 / 11 / Linux).
+servidor_database.py — Servidor Dedicado de Base de Datos para INVERANOLI
+Compatible 100% con Windows 7, 8, 10, 11 (Python 2.7 y Python 3.x).
 Cero dependencias externas (usa unicamente modulos nativos de la libreria estandar).
 No requiere permisos de administrador.
 
-Puertos:
-- 3001: API de Base de Datos Relacional (/api/database, /api/productos, /api/estado)
-- 3000: Servidor web opcional de la pagina estatica (/public) si se desea abrir via http://localhost:3000
+Puerto 3001: API de Base de Datos Relacional (/api/database, /api/productos, /api/estado)
 """
 
 import os
 import sys
 import json
 import re
+
+# Compatibilidad con consolas Windows (evitar caidas por codificacion de caracteres)
+try:
+    if sys.stdout.encoding != 'utf-8':
+        if hasattr(sys.stdout, 'reconfigure'):
+            sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+        if hasattr(sys.stderr, 'reconfigure'):
+            sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+except Exception:
+    pass
 
 # Compatibilidad transparente Python 2 y Python 3
 if sys.version_info[0] >= 3:
@@ -27,7 +35,6 @@ else:
 PORT_DB = 3001
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SCHEMA_PATH = os.path.join(BASE_DIR, 'database', 'schema.sql')
-PUBLIC_DIR = os.path.join(BASE_DIR, 'public')
 
 
 def limpiar_valor_sql(val):
@@ -157,8 +164,10 @@ def leer_datos_desde_sql():
 
 class ManejadorBD(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
-        # Mantiene la consola limpia y elegante
-        sys.stderr.write("[%s] %s\n" % (self.log_date_time_string(), format % args))
+        try:
+            sys.stderr.write("[%s] %s\n" % (self.log_date_time_string(), format % args))
+        except Exception:
+            pass
 
     def do_OPTIONS(self):
         self.send_response(204)
@@ -205,7 +214,7 @@ class ManejadorBD(BaseHTTPRequestHandler):
             datos = leer_datos_desde_sql()
             return self.responder_json(200, datos)
 
-        # 4. Pantalla de bienvenida / Dashboard informativo
+        # 4. Pantalla de bienvenida
         if ruta in ('/', ''):
             datos = leer_datos_desde_sql()
             total_prods = len(datos.get('productos', []))
@@ -229,24 +238,24 @@ class ManejadorBD(BaseHTTPRequestHandler):
 </head>
 <body>
   <div class="card">
-    <h1>✦ SERVIDOR PYTHON DE BASE DE DATOS INVERANOLI ✦</h1>
-    <div class="badge">● SERVIDOR PYTHON ACTIVO EN PUERTO %d</div>
+    <h1>[INVERANOLI] SERVIDOR PYTHON DE BASE DE DATOS</h1>
+    <div class="badge">SERVIDOR PYTHON ACTIVO EN PUERTO %d</div>
     <div class="info">
       <p><strong>Estado:</strong> %s</p>
       <p><strong>Motor:</strong> Python nativo universal (Sin dependencias externas ni pip)</p>
       <p><strong>Total Joyas:</strong> %d productos</p>
-      <p><strong>Total Categorías:</strong> %d categorías</p>
+      <p><strong>Total Categorias:</strong> %d categorias</p>
       <p><strong>Endpoint API:</strong> <code>http://localhost:%d/api/database</code></p>
     </div>
     <p class="footer-note">
       Compatible con Windows 7, 8, 10, 11 y navegadores ligeros.<br>
-      Puedes abrir <code>public/index.html</code> con doble clic o en tu navegador favorito.
+      Abre <code>public/index.html</code> en tu navegador.
     </p>
   </div>
 </body>
 </html>""" % (
                 PORT_DB,
-                u"✓ Base de datos vinculada con éxito" if disponible else u"⚠️ Archivo database/schema.sql ausente",
+                u"Base de datos vinculada con exito" if disponible else u"Archivo database/schema.sql ausente",
                 total_prods,
                 total_cats,
                 PORT_DB
@@ -267,12 +276,12 @@ class ManejadorBD(BaseHTTPRequestHandler):
 def ejecutar():
     servidor = HTTPServer(('0.0.0.0', PORT_DB), ManejadorBD)
     print("========================================================")
-    print("💎 INVERANOLI — SERVIDOR PYTHON DE BASE DE DATOS")
+    print("INVERANOLI - SERVIDOR PYTHON DE BASE DE DATOS")
     print("========================================================")
-    print("✓ Servidor Python activo en: http://localhost:%d" % PORT_DB)
-    print("✓ Endpoint API de BD:       http://localhost:%d/api/database" % PORT_DB)
-    print("✓ Compatible con Windows 7 en adelante (Cero dependencias)")
-    print("✓ No requiere permisos de administrador ni paquetes pip")
+    print("Servidor Python activo en: http://localhost:%d" % PORT_DB)
+    print("Endpoint API de BD:       http://localhost:%d/api/database" % PORT_DB)
+    print("Compatible con Windows 7 en adelante (Cero dependencias)")
+    print("No requiere permisos de administrador ni paquetes pip")
     print("--------------------------------------------------------")
     print("Presiona Ctrl+C para detener el servidor.")
     print("========================================================\n")
@@ -280,7 +289,10 @@ def ejecutar():
         servidor.serve_forever()
     except KeyboardInterrupt:
         print("\nServidor detenido correctamente.")
-        servidor.server_close()
+        try:
+            servidor.server_close()
+        except Exception:
+            pass
 
 
 if __name__ == '__main__':

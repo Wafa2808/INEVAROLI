@@ -15,6 +15,17 @@ import os
 import sys
 import threading
 import webbrowser
+import time
+
+# Compatibilidad con consolas Windows (evitar caidas por codificacion de caracteres)
+try:
+    if sys.stdout.encoding != 'utf-8':
+        if hasattr(sys.stdout, 'reconfigure'):
+            sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+        if hasattr(sys.stderr, 'reconfigure'):
+            sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+except Exception:
+    pass
 
 # Cargar el manejador de base de datos desde servidor_database.py
 import servidor_database
@@ -32,11 +43,6 @@ PUBLIC_DIR = os.path.join(BASE_DIR, 'public')
 
 
 class PublicFolderHandler(SimpleHTTPRequestHandler):
-    def __init__(self, *args, **kwargs):
-        # En Python 3.7+ SimpleHTTPRequestHandler acepta directory=
-        # Para compatibilidad con versiones viejas (Python 2.7, 3.4, 3.5, 3.6), cambiamos el directorio de trabajo o usamos translate_path
-        SimpleHTTPRequestHandler.__init__(self, *args, **kwargs)
-
     def translate_path(self, path):
         # Mapea cualquier peticion web a la carpeta /public
         path = SimpleHTTPRequestHandler.translate_path(self, path)
@@ -55,7 +61,7 @@ def iniciar_servidor_bd():
         httpd_bd = HTTPServer(('0.0.0.0', PORT_DB), servidor_database.ManejadorBD)
         httpd_bd.serve_forever()
     except Exception as e:
-        sys.stderr.write("Error en Servidor BD: %s\n" % str(e))
+        sys.stderr.write("Aviso en Servidor BD: %s\n" % str(e))
 
 
 def iniciar_servidor_web():
@@ -63,22 +69,22 @@ def iniciar_servidor_web():
         httpd_web = HTTPServer(('0.0.0.0', PORT_WEB), PublicFolderHandler)
         httpd_web.serve_forever()
     except Exception as e:
-        sys.stderr.write("Error en Servidor Web: %s\n" % str(e))
+        sys.stderr.write("Aviso en Servidor Web: %s\n" % str(e))
 
 
 def main():
     print("========================================================")
-    print("💎 INVERANOLI — SERVIDOR TODO EN UNO (PYTHON NATIVO)")
+    print("INVERANOLI - SERVIDOR INTEGRADO (PYTHON NATIVO)")
     print("========================================================")
-    print("✓ Cero dependencias externas (Sin Node.js, sin pip)")
-    print("✓ Compatible con Windows 7, 8, 10, 11 (Python 2.7 y 3.x)")
-    print("✓ Cero permisos de administrador requeridos")
+    print("Cero dependencias externas (Sin Node.js, sin pip)")
+    print("Compatible con Windows 7, 8, 10, 11 (Python 2.7 y 3.x)")
+    print("Cero permisos de administrador requeridos")
     print("--------------------------------------------------------")
-    print("🌐 Servidor Web:       http://localhost:%d" % PORT_WEB)
-    print("🗄️ Servidor Base Datos: http://localhost:%d/api/database" % PORT_DB)
+    print("Servidor Web:        http://localhost:%d" % PORT_WEB)
+    print("Servidor Base Datos: http://localhost:%d/api/database" % PORT_DB)
     print("--------------------------------------------------------")
     print("Abriendo el navegador en http://localhost:%d ..." % PORT_WEB)
-    print("Presiona Ctrl+C en esta ventana para detener el sistema.")
+    print("Presiona Ctrl+C para detener el sistema.")
     print("========================================================\n")
 
     hilo_bd = threading.Thread(target=iniciar_servidor_bd)
@@ -97,8 +103,6 @@ def main():
 
     try:
         while True:
-            # Mantener hilo principal vivo compatible con py2 y py3
-            import time
             time.sleep(1)
     except KeyboardInterrupt:
         print("\nDeteniendo servidores de INVERANOLI...")
