@@ -1,5 +1,5 @@
 /**
- * validaciones.js — Reglas de Negocio y Validación Estricta para INEVAROLI
+ * validaciones.js — Reglas de Negocio y Validación Estricta para INVERANOLI
  * Adaptado a la normativa comercial venezolana:
  * - Cédula de 7 u 8 dígitos numéricos
  * - Teléfono móvil con prefijos nacionales (0414, 0424, 0412, 0416, 0426) + 7 dígitos

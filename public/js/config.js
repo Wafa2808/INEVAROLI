@@ -1,12 +1,12 @@
 // ====================================================================
-// Configuración Central de INEVAROLI Joyería (@inveranoli2017)
+// Configuración Central de INVERANOLI Joyería (@inveranoli2017)
 // Los datos como RIF y WhatsApp se encuentran parametrizados para 
 // facilitar su reemplazo inmediato cuando el usuario los suministre.
 // ====================================================================
 
-var INEVAROLI_CONFIG = {
-  nombre: 'INEVAROLI Joyería',
-  marca: 'INEVAROLI',
+var INVERANOLI_CONFIG = {
+  nombre: 'INVERANOLI Joyería',
+  marca: 'INVERANOLI',
   eslogan: 'Joyería Fina, Anillos de Grado, Matrimonio & Acero Inoxidable',
   instagram: '@inveranoli2017',
   instagram_url: 'https://www.instagram.com/inveranoli2017/',
@@ -45,7 +45,7 @@ var INEVAROLI_CONFIG = {
       label: 'Transferencia Bancaria Nacional',
       banco: 'Banco de Venezuela',
       cuenta: '0102-0123-45-0000316090',
-      titular: 'INEVAROLI Joyería C.A.',
+      titular: 'INVERANOLI Joyería C.A.',
       rif: 'J-316090539',
       instruccion: 'Transferencia a cuenta corriente empresarial. Por favor indicar número de comprobante.'
     },
@@ -66,4 +66,4 @@ var INEVAROLI_CONFIG = {
 };
 
 // Variable alias para compatibilidad y fácil acceso
-var TIENDA_CONFIG = INEVAROLI_CONFIG;
+var TIENDA_CONFIG = INVERANOLI_CONFIG;

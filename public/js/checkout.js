@@ -1,5 +1,5 @@
 /**
- * checkout.js — Flujo de Compra Completo en 4 Pasos para INEVAROLI
+ * checkout.js — Flujo de Compra Completo en 4 Pasos para INVERANOLI
  * 1. Resumen de la Orden (USD y Bs BCV)
  * 2. Despacho (Retiro en Tienda CC Gran Bazar o Envíos Zoom/MRW/Tealca a nivel nacional)
  * 3. Métodos de Pago Venezolanos (Pago Móvil, Transferencia, Efectivo en Tienda, Zelle)
@@ -242,7 +242,7 @@ var Checkout = (function () {
     var metodoId = selectMetodo.value;
     datosOrden.metodoPago = metodoId;
 
-    var metodos = INEVAROLI_CONFIG.metodos_pago || [];
+    var metodos = INVERANOLI_CONFIG.metodos_pago || [];
     var met = metodos.find(function (m) { return m.id === metodoId; });
 
     if (met) {
@@ -296,7 +296,7 @@ var Checkout = (function () {
       '  <div style="text-align:center; margin-bottom:14px;">' +
       '    <span class="badge-confirmado" style="background:#10b981; color:#ffffff; padding:4px 10px; border-radius:4px; font-weight:800;">ORDEN LISTA PARA PROCESAR</span>' +
       '    <h3 style="margin-top:10px; color:var(--gold-light); font-size:1.35rem;">Pedido #' + numOrden + '</h3>' +
-      '    <p style="color:#94a3b8; font-size:0.9rem;">INEVAROLI Joyería — CC Gran Bazar Valencia (@inveranoli2017)</p>' +
+      '    <p style="color:#94a3b8; font-size:0.9rem;">INVERANOLI Joyería — CC Gran Bazar Valencia (@inveranoli2017)</p>' +
       '  </div>' +
       '  <div class="confirmacion-grid" style="color:#ffffff; font-size:0.92rem; line-height:1.6;">' +
       '    <div><strong style="color:var(--gold-light);">👤 Destinatario:</strong> ' + datosOrden.destinatario + ' (C.I. ' + datosOrden.cedula + ')</div>' +
@@ -363,7 +363,7 @@ var Checkout = (function () {
     // 5. Construir Mensaje de WhatsApp Altamente Intuitivo y Profesional
     var metodoTexto = datosOrden.metodoPago === 'pago_movil' ? 'Pago Móvil (Tasa Oficial BCV)' : (datosOrden.metodoPago === 'transferencia' ? 'Transferencia Bancaria Nacional' : 'Efectivo en Tienda ($ USD / Bs)');
 
-    var waTexto = '✨ *SOLICITUD DE PEDIDO FORMAL — INEVAROLI JOYERÍA* ✨\n';
+    var waTexto = '✨ *SOLICITUD DE PEDIDO FORMAL — INVERANOLI JOYERÍA* ✨\n';
     waTexto += '💎 *@inveranoli2017* • Valencia, Edo. Carabobo\n';
     waTexto += '───────────────────────────\n';
     waTexto += '📋 *ORDEN WEB N°:* #' + ordenId + '\n';
@@ -405,7 +405,7 @@ var Checkout = (function () {
     waTexto += 'Adjunto a continuación la captura / comprobante de mi pago para su verificación y emisión de nota de entrega.\n\n';
     waTexto += '¡Quedo atento(a) a su confirmación y comienzo de fabricación/ajuste! Muchas gracias. ✨';
 
-    var waNum = INEVAROLI_CONFIG.whatsapp || '584125006377';
+    var waNum = INVERANOLI_CONFIG.whatsapp || '584125006377';
     var urlWA = 'https://wa.me/' + waNum + '?text=' + encodeURIComponent(waTexto);
 
     // 6. Vaciar carrito
@@ -415,9 +415,9 @@ var Checkout = (function () {
     // 7. Abrir WhatsApp
     window.open(urlWA, '_blank');
     if (typeof Notificaciones !== 'undefined') {
-      Notificaciones.alerta('¡Pedido #' + ordenId + ' registrado exitosamente en el sistema de INEVAROLI! Tu mensaje estructurado ha sido generado para WhatsApp.', '¡Pedido Confirmado!');
+      Notificaciones.alerta('¡Pedido #' + ordenId + ' registrado exitosamente en el sistema de INVERANOLI! Tu mensaje estructurado ha sido generado para WhatsApp.', '¡Pedido Confirmado!');
     } else {
-      alert('¡Pedido #' + ordenId + ' registrado exitosamente en el sistema de INEVAROLI!');
+      alert('¡Pedido #' + ordenId + ' registrado exitosamente en el sistema de INVERANOLI!');
     }
   }
 

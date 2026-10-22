@@ -148,7 +148,7 @@ const server = http.createServer((req, res) => {
       <html lang="es">
       <head>
         <meta charset="UTF-8">
-        <title>Servidor de Base de Datos — INEVAROLI</title>
+        <title>Servidor de Base de Datos — INVERANOLI</title>
         <style>
           body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b0f19; color: #f8fafc; padding: 40px 20px; text-align: center; }
           .card { background: #182238; border: 1px solid #d4af37; border-radius: 12px; max-width: 600px; margin: 0 auto; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
@@ -160,7 +160,7 @@ const server = http.createServer((req, res) => {
       </head>
       <body>
         <div class="card">
-          <h1>✦ SERVIDOR DE BASE DE DATOS INEVAROLI ✦</h1>
+          <h1>✦ SERVIDOR DE BASE DE DATOS INVERANOLI ✦</h1>
           <div class="badge">● SERVIDOR ACTIVO EN PUERTO ${PORT}</div>
           <div class="info">
             <p><strong>Estado:</strong> ${datos.disponible ? '✓ Base de datos vinculada con éxito' : '⚠️ Archivo database/schema.sql ausente'}</p>
@@ -183,7 +183,7 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, () => {
   console.log('========================================================');
-  console.log('💎 INEVAROLI — SERVIDOR DEDICADO DE BASE DE DATOS');
+  console.log('💎 INVERANOLI — SERVIDOR DEDICADO DE BASE DE DATOS');
   console.log('========================================================');
   console.log(`✓ Servidor ejecutándose en: http://localhost:${PORT}`);
   console.log(`✓ Endpoint de base de datos: http://localhost:${PORT}/api/database`);

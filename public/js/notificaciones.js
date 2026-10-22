@@ -8,10 +8,10 @@ var Notificaciones = (function () {
 
   // Contenedor de Toasts
   function asegurarContenedorToasts() {
-    var cont = document.getElementById('inevaroli-toasts-container');
+    var cont = document.getElementById('inveranoli-toasts-container');
     if (!cont) {
       cont = document.createElement('div');
-      cont.id = 'inevaroli-toasts-container';
+      cont.id = 'inveranoli-toasts-container';
       cont.className = 'toasts-container';
       document.body.appendChild(cont);
     }
@@ -52,7 +52,7 @@ var Notificaciones = (function () {
 
   // Modal de Alerta personalizada (reemplazo de alert)
   function alerta(mensaje, titulo, callback) {
-    var modal = document.getElementById('inevaroli-custom-modal');
+    var modal = document.getElementById('inveranoli-custom-modal');
     if (!modal) {
       modal = crearModalDialogo();
     }
@@ -64,7 +64,7 @@ var Notificaciones = (function () {
     var btnOk = document.getElementById('custom-dialog-btn-ok');
     var btnCancel = document.getElementById('custom-dialog-btn-cancel');
 
-    if (elTitulo) elTitulo.textContent = titulo || 'INEVAROLI Joyería';
+    if (elTitulo) elTitulo.textContent = titulo || 'INVERANOLI Joyería';
     if (elMensaje) elMensaje.innerHTML = String(mensaje || '').replace(/\n/g, '<br>');
     if (elInputBox) elInputBox.style.display = 'none';
     if (quickBox) quickBox.style.display = 'none';
@@ -85,7 +85,7 @@ var Notificaciones = (function () {
 
   // Modal de Confirmación personalizada (reemplazo de confirm)
   function confirmar(mensaje, titulo, onConfirmar, onCancelar) {
-    var modal = document.getElementById('inevaroli-custom-modal');
+    var modal = document.getElementById('inveranoli-custom-modal');
     if (!modal) {
       modal = crearModalDialogo();
     }
@@ -125,7 +125,7 @@ var Notificaciones = (function () {
 
   // Modal de Entrada de Datos (reemplazo de prompt)
   function prompt(mensaje, titulo, valorInicial, onAceptar, onCancelar, tipoInput) {
-    var modal = document.getElementById('inevaroli-custom-modal');
+    var modal = document.getElementById('inveranoli-custom-modal');
     if (!modal) {
       modal = crearModalDialogo();
     }
@@ -204,11 +204,11 @@ var Notificaciones = (function () {
   }
 
   function crearModalDialogo() {
-    var m = document.getElementById('inevaroli-custom-modal');
+    var m = document.getElementById('inveranoli-custom-modal');
     if (m) return m;
 
     m = document.createElement('div');
-    m.id = 'inevaroli-custom-modal';
+    m.id = 'inveranoli-custom-modal';
     m.className = 'modal-fondo custom-dialog-fondo visible';
     m.style.display = 'none';
     m.style.zIndex = '100000';
@@ -216,9 +216,9 @@ var Notificaciones = (function () {
 
     m.innerHTML =
       '<div class="modal-caja custom-dialog-caja">' +
-      '  <button type="button" class="modal-cerrar" onclick="document.getElementById(\'inevaroli-custom-modal\').style.display=\'none\'" title="Cerrar ventana">×</button>' +
+      '  <button type="button" class="modal-cerrar" onclick="document.getElementById(\'inveranoli-custom-modal\').style.display=\'none\'" title="Cerrar ventana">×</button>' +
       '  <div class="custom-dialog-icono"><svg class="nav-icon-svg" style="width:28px;height:28px;color:var(--gold-primary);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="6 3 18 3 22 9 12 22 2 9"></polygon></svg></div>' +
-      '  <h3 id="custom-dialog-title" class="custom-dialog-titulo">INEVAROLI Joyería</h3>' +
+      '  <h3 id="custom-dialog-title" class="custom-dialog-titulo">INVERANOLI Joyería</h3>' +
       '  <div id="custom-dialog-message" class="custom-dialog-mensaje"></div>' +
       '  <div id="custom-dialog-input-box" class="custom-dialog-input-box" style="display:none;">' +
       '    <input type="text" id="custom-dialog-input" class="custom-dialog-input" autocomplete="off">' +

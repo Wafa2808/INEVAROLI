@@ -66,8 +66,8 @@ var CarruselInicio = (function () {
 
   function iniciarRotacion() {
     if (timerHero) clearInterval(timerHero);
-    var segundos = (typeof INEVAROLI_CONFIG !== 'undefined' && INEVAROLI_CONFIG.carruseles)
-      ? INEVAROLI_CONFIG.carruseles.inicio_segundos
+    var segundos = (typeof INVERANOLI_CONFIG !== 'undefined' && INVERANOLI_CONFIG.carruseles)
+      ? INVERANOLI_CONFIG.carruseles.inicio_segundos
       : 5;
     timerHero = setInterval(siguienteHero, segundos * 1000);
   }

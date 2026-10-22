@@ -1,9 +1,9 @@
 @echo off
-title INEVAROLI - Servidor de Base de Datos
+title INVERANOLI - Servidor de Base de Datos
 color 0E
 cls
 echo ========================================================
-echo        INEVAROLI JOYERIA - SERVIDOR DE BASE DE DATOS
+echo        INVERANOLI JOYERIA - SERVIDOR DE BASE DE DATOS
 echo ========================================================
 echo.
 echo Levantando servidor en puerto 3001...

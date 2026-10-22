@@ -1,7 +1,7 @@
 /**
  * motor-sql.js — Motor de Base de Datos Relacional SQL Puro en Cliente
  * Compatible 100% con Windows 7, file:/// y computadoras de bajos recursos.
- * Implementa el esquema relacional formal para INEVAROLI Joyería (@inveranoli2017).
+ * Implementa el esquema relacional formal para INVERANOLI Joyería (@inveranoli2017).
  * 
  * Tablas:
  * - usuarios (id, nombre, apellido, cedula, telefono, email, password_hash, sal, rol)
@@ -17,12 +17,12 @@ var MotorSQL = (function () {
   var TABLAS = ['usuarios', 'categorias', 'productos', 'ordenes', 'detalle_ordenes'];
 
   // Cache en memoria por si el navegador opera en modo estricto de file:///
-  if (typeof window !== 'undefined' && !window._INEVAROLI_DB_STORE) {
-    window._INEVAROLI_DB_STORE = {};
+  if (typeof window !== 'undefined' && !window._INVERANOLI_DB_STORE) {
+    window._INVERANOLI_DB_STORE = {};
   }
 
   function claveTabla(nombre) {
-    return 'db_inevaroli_' + nombre;
+    return 'db_inveranoli_' + nombre;
   }
 
   // Obtiene los registros de una tabla
@@ -32,8 +32,8 @@ var MotorSQL = (function () {
     // Regla estricta: productos y categorías NO se leen de almacenamiento local persistente
     // Dependen 100% de la conexión con el servidor de base de datos (puerto 3001)
     if (nombre === 'productos' || nombre === 'categorias') {
-      if (typeof window !== 'undefined' && window._INEVAROLI_DB_STORE && Array.isArray(window._INEVAROLI_DB_STORE[clave])) {
-        return window._INEVAROLI_DB_STORE[clave];
+      if (typeof window !== 'undefined' && window._INVERANOLI_DB_STORE && Array.isArray(window._INVERANOLI_DB_STORE[clave])) {
+        return window._INVERANOLI_DB_STORE[clave];
       }
       return [];
     }
@@ -42,8 +42,8 @@ var MotorSQL = (function () {
     if (typeof Api !== 'undefined' && Api && typeof Api.leer === 'function') {
       var datosApi = Api.leer(clave, null);
       if (datosApi && Array.isArray(datosApi)) {
-        if (typeof window !== 'undefined' && window._INEVAROLI_DB_STORE) {
-          window._INEVAROLI_DB_STORE[clave] = datosApi;
+        if (typeof window !== 'undefined' && window._INVERANOLI_DB_STORE) {
+          window._INVERANOLI_DB_STORE[clave] = datosApi;
         }
         return datosApi;
       }
@@ -56,8 +56,8 @@ var MotorSQL = (function () {
         if (raw) {
           var parsed = JSON.parse(raw);
           if (Array.isArray(parsed)) {
-            if (typeof window !== 'undefined' && window._INEVAROLI_DB_STORE) {
-              window._INEVAROLI_DB_STORE[clave] = parsed;
+            if (typeof window !== 'undefined' && window._INVERANOLI_DB_STORE) {
+              window._INVERANOLI_DB_STORE[clave] = parsed;
             }
             return parsed;
           }
@@ -66,8 +66,8 @@ var MotorSQL = (function () {
     } catch (e) {}
 
     // 3. Fallback en memoria de ventana
-    if (typeof window !== 'undefined' && window._INEVAROLI_DB_STORE && Array.isArray(window._INEVAROLI_DB_STORE[clave])) {
-      return window._INEVAROLI_DB_STORE[clave];
+    if (typeof window !== 'undefined' && window._INVERANOLI_DB_STORE && Array.isArray(window._INVERANOLI_DB_STORE[clave])) {
+      return window._INVERANOLI_DB_STORE[clave];
     }
 
     return [];
@@ -77,8 +77,8 @@ var MotorSQL = (function () {
   function persistirTabla(nombre, filas) {
     var clave = claveTabla(nombre);
     
-    if (typeof window !== 'undefined' && window._INEVAROLI_DB_STORE) {
-      window._INEVAROLI_DB_STORE[clave] = filas;
+    if (typeof window !== 'undefined' && window._INVERANOLI_DB_STORE) {
+      window._INVERANOLI_DB_STORE[clave] = filas;
     }
 
     // Regla estricta: productos y categorías NO se guardan en almacenamiento local persistente
@@ -269,7 +269,7 @@ var MotorSQL = (function () {
     if (TABLAS.indexOf(nombre) !== -1) {
       persistirTabla(nombre, []);
       if (nombre === 'productos') {
-        try { if (typeof localStorage !== 'undefined') localStorage.setItem('inevaroli_catalogo_vaciado', '1'); } catch (e) {}
+        try { if (typeof localStorage !== 'undefined') localStorage.setItem('inveranoli_catalogo_vaciado', '1'); } catch (e) {}
       }
     }
   }
@@ -279,7 +279,7 @@ var MotorSQL = (function () {
     TABLAS.forEach(function (t) {
       persistirTabla(t, []);
     });
-    try { if (typeof localStorage !== 'undefined') localStorage.setItem('inevaroli_catalogo_vaciado', '1'); } catch (e) {}
+    try { if (typeof localStorage !== 'undefined') localStorage.setItem('inveranoli_catalogo_vaciado', '1'); } catch (e) {}
   }
 
   // Carga e interpreta sentencias SQL tipo INSERT INTO para levantar o restaurar datos desde un archivo .sql
@@ -333,7 +333,7 @@ var MotorSQL = (function () {
     if (prods.length) {
       persistirTabla('productos', prods);
       try {
-        if (typeof localStorage !== 'undefined') localStorage.removeItem('inevaroli_catalogo_vaciado');
+        if (typeof localStorage !== 'undefined') localStorage.removeItem('inveranoli_catalogo_vaciado');
       } catch (e) {}
     }
 

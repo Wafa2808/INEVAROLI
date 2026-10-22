@@ -1,5 +1,5 @@
 /**
- * cart.js — Carrito de Compras de Joyería INEVAROLI
+ * cart.js — Carrito de Compras de Joyería INVERANOLI
  * Reglas Comerciales Estrictas:
  * 1. Autenticación obligatoria para comprar (redirige al login si no ha iniciado sesión).
  * 2. Separación de roles: Las cuentas 'admin' no pueden armar carritos de compras.

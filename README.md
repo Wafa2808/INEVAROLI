@@ -1,4 +1,4 @@
-# INEVAROLI Joyería Fina & Accesorios (@inveranoli2017)
+# INVERANOLI Joyería Fina & Accesorios (@inveranoli2017)
 
 Sistema web comercial de alta gama especializado en **anillos de grado para bachillerato y universidades**, **alianzas de matrimonio**, **anillos de compromiso** y **joyería en acero quirúrgico 316L y plata ley 925**.
 
@@ -10,11 +10,11 @@ Diseñado y optimizado para ejecutarse **100% de manera local y sin dependencias
 
 ## 🚀 Cómo ejecutar el proyecto
 
-1. Navegar a la carpeta `INEVAROLI/public`.
+1. Navegar a la carpeta `INVERANOLI/public`.
 2. Hacer **doble clic en `index.html`** (o clic derecho > *Abrir con* > Tu navegador web favorito: Chrome, Edge, Firefox).
 3. **¡Listo!** No requiere instalar Node.js, npm, Python, bases de datos externas (MySQL/PostgreSQL) ni levantar servidores locales.
 
-> **Modo Servidor Opcional:** Si deseas ejecutarlo mediante un servidor local liviano, abre una terminal en la carpeta `INEVAROLI` y ejecuta:
+> **Modo Servidor Opcional:** Si deseas ejecutarlo mediante un servidor local liviano, abre una terminal en la carpeta `INVERANOLI` y ejecuta:
 > ```bash
 > npm start
 > ```
@@ -129,7 +129,7 @@ Para agregar más unidades al inventario sin abrir la base de datos:
 1. **Paso 1 (Resumen):** Desglose detallado de joyas, cantidades, grabados personalizados y subtotal en USD y Bolívares (Tasa Oficial BCV).
 2. **Paso 2 (Despacho / Retiro):** Selección entre Retiro en Tienda Física (CC Gran Bazar, Av. Lara, Valencia) o Envío Nacional (MRW, Zoom, Tealca) a cualquier estado de Venezuela.
 3. **Paso 3 (Métodos de Pago):** Pago Móvil (Banesco/BDV), Transferencia Bancaria Nacional, Efectivo en Tienda (USD/Bs) y Zelle, con instrucciones y campo de referencia bancaria.
-4. **Paso 4 (Confirmación & WhatsApp):** Resumen consolidado del pedido, guardado en base de datos, descuento de inventario, vaciado de carrito y apertura de WhatsApp con el mensaje estructurado para el asesor de INEVAROLI.
+4. **Paso 4 (Confirmación & WhatsApp):** Resumen consolidado del pedido, guardado en base de datos, descuento de inventario, vaciado de carrito y apertura de WhatsApp con el mensaje estructurado para el asesor de INVERANOLI.
 
 ---
 
@@ -137,8 +137,8 @@ Para agregar más unidades al inventario sin abrir la base de datos:
 Los datos comerciales principales se encuentran centralizados en `public/js/config.js` con marcadores limpios para que puedas ingresar el RIF y número de WhatsApp definitivo:
 
 ```javascript
-var INEVAROLI_CONFIG = {
-  nombre: 'INEVAROLI Joyería',
+var INVERANOLI_CONFIG = {
+  nombre: 'INVERANOLI Joyería',
   instagram: '@inveranoli2017',
   whatsapp: '584247085796', // Editable
   rif: 'J-00000000-0',       // Editable
@@ -152,12 +152,12 @@ var INEVAROLI_CONFIG = {
 ## 📁 Estructura del Proyecto
 
 ```text
-INEVAROLI/
+INVERANOLI/
 ├── database/
 │   └── schema.sql              # Esquema relacional formal en SQLite
 ├── public/
 │   ├── index.html              # Estructura principal y semántica de la aplicación
-│   ├── logo.png                # Logotipo oficial de INEVAROLI Joyería
+│   ├── logo.png                # Logotipo oficial de INVERANOLI Joyería
 │   ├── css/
 │   │   ├── styles.css          # Estilos globales, paleta oro/negro y tarjetas
 │   │   ├── modales.css         # Ventanas emergentes, carrusel y checkout
@@ -197,6 +197,6 @@ INEVAROLI/
 │       ├── admin.js            # Panel de inventario y reposición de stock (+ Stock)
 │       └── main.js             # Inicialización de eventos e interfaz
 ├── package.json                # Servidor estático opcional sin dependencias
-├── Adiciones_INEVAROLI.txt     # Matriz de requerimientos técnicos cumplidos
+├── Adiciones_INVERANOLI.txt     # Matriz de requerimientos técnicos cumplidos
 └── README.md                   # Documentación completa del proyecto
 ```

@@ -1,5 +1,5 @@
 // ====================================================================
-// INEVAROLI Joyería (@inveranoli2017)
+// INVERANOLI Joyería (@inveranoli2017)
 // Arquitectura 100% No Local
 // 
 // Los productos y categorías no se guardan estáticamente en el frontend.

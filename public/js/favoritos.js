@@ -1,5 +1,5 @@
 /**
- * favoritos.js — Lista de Deseos / Joyas Favoritas para INEVAROLI
+ * favoritos.js — Lista de Deseos / Joyas Favoritas para INVERANOLI
  * Permite a los clientes guardar sus piezas preferidas para graduaciones o bodas.
  */
 

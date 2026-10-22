@@ -1,5 +1,5 @@
 /**
- * admin.js — Panel de Control y Administración de Inventario para INEVAROLI
+ * admin.js — Panel de Control y Administración de Inventario para INVERANOLI
  * 
  * Funcionalidades Clave:
  * 1. Precarga automática de Administrador (12345678 / Admin123*) y Cliente por Defecto (20123456 / Cliente123*).
@@ -15,17 +15,17 @@ async function precargarUsuarios() {
 
   // 1. Administrador (Cédula: 12345678 / Clave: Admin123*)
   var adminUser = usuarios.find(function (u) { return String(u.cedula) === '12345678' || u.rol === 'admin'; });
-  var salAdmin = 'sal_admin_inevaroli_2026';
+  var salAdmin = 'sal_admin_inveranoli_2026';
   var hashAdmin = await hashearPassword('Admin123*', salAdmin);
 
   if (!adminUser) {
     MotorSQL.insertar('usuarios', {
       id: 1,
       nombre: 'Administrador',
-      apellido: 'INEVAROLI',
+      apellido: 'INVERANOLI',
       cedula: '12345678',
       telefono: '04125006377',
-      email: 'admin@inevaroli.com',
+      email: 'admin@inveranoli.com',
       sal: salAdmin,
       password_hash: hashAdmin,
       rol: 'admin'
@@ -40,7 +40,7 @@ async function precargarUsuarios() {
 
   // 2. Cliente Registrado Oficial (Cédula: 20123456 / Clave: Cliente123*)
   var clienteUser = usuarios.find(function (u) { return String(u.cedula) === '20123456'; });
-  var salCli = 'sal_cliente_inevaroli_2026';
+  var salCli = 'sal_cliente_inveranoli_2026';
   var hashCli = await hashearPassword('Cliente123*', salCli);
 
   if (!clienteUser) {
@@ -242,7 +242,7 @@ function reponerStock(id) {
 
   Notificaciones.prompt(
     mensajePrompt,
-    'Reposición de Stock — INEVAROLI',
+    'Reposición de Stock — INVERANOLI',
     '10',
     function (cantidad) {
       if (!cantidad) return;

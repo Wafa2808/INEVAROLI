@@ -1,5 +1,5 @@
 /**
- * auth.js — Sistema de Autenticación, Registro, Perfil y Sesión para INEVAROLI
+ * auth.js — Sistema de Autenticación, Registro, Perfil y Sesión para INVERANOLI
  * 1. Restricciones estrictas en registro (Cédula 7-8 dígitos, teléfono +58, contraseña fuerte con salt).
  * 2. Bloqueo temporal por 3 minutos tras 5 intentos fallidos.
  * 3. Modificación de perfil con comprobación obligatoria de clave actual.
@@ -109,7 +109,7 @@ async function procesarLogin(e) {
         (cedulaLimpia === '20123456' && pass === 'Cliente123*')) {
       esValido = true;
       // Auto-reparar el hash almacenado para consistencia perfecta
-      var salNueva = 'sal_' + (cedulaLimpia === '12345678' ? 'admin' : 'cliente') + '_inevaroli_2026';
+      var salNueva = 'sal_' + (cedulaLimpia === '12345678' ? 'admin' : 'cliente') + '_inveranoli_2026';
       var hashNuevo = await hashearPassword(pass, salNueva);
       MotorSQL.actualizar('usuarios', function (u) { return u.id === user.id; }, {
         sal: salNueva,
@@ -145,7 +145,7 @@ async function procesarLogin(e) {
   actualizarInterfazUsuario();
   cerrarAuthModal();
 
-  Notificaciones.toast('¡Bienvenido(a) a INEVAROLI, ' + user.nombre + '!', 'exito', 3500);
+  Notificaciones.toast('¡Bienvenido(a) a INVERANOLI, ' + user.nombre + '!', 'exito', 3500);
 
   // Si es admin, abrir panel
   if (user.rol === 'admin') {
@@ -231,7 +231,7 @@ async function procesarRegistro(e) {
   actualizarInterfazUsuario();
   cerrarAuthModal();
 
-  Notificaciones.toast('¡Cuenta creada exitosamente en INEVAROLI, ' + nuevoUsuario.nombre + '!', 'exito', 4000);
+  Notificaciones.toast('¡Cuenta creada exitosamente en INVERANOLI, ' + nuevoUsuario.nombre + '!', 'exito', 4000);
 }
 
 // ─── Recuperación Simulada de Contraseña ───

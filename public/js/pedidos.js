@@ -1,6 +1,6 @@
 /**
  * pedidos.js — Historial de Pedidos del Cliente con Consultas JOIN Relacionales
- * Muestra el seguimiento y compras realizadas por el usuario actual en INEVAROLI.
+ * Muestra el seguimiento y compras realizadas por el usuario actual en INVERANOLI.
  */
 
 function mostrarPedidosModal() {

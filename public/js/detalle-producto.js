@@ -30,7 +30,7 @@ function abrirDetalleProducto(id) {
   var elStock = document.getElementById('detalle-stock-badge');
 
   if (elTitulo) elTitulo.textContent = p.nombre;
-  if (elMaterial) elMaterial.textContent = p.presentacion || 'Joyería Fina INEVAROLI';
+  if (elMaterial) elMaterial.textContent = p.presentacion || 'Joyería Fina INVERANOLI';
   if (elDesc) elDesc.textContent = p.descripcion || '';
   if (elPiedras) elPiedras.textContent = p.piedras || 'Sin piedras incrustadas';
   if (elTallas) elTallas.textContent = p.tallas || 'Medida estándar';

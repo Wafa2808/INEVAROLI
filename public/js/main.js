@@ -1,5 +1,5 @@
 /**
- * main.js — Orquestador Central y Renderizado de Vistas para INEVAROLI
+ * main.js — Orquestador Central y Renderizado de Vistas para INVERANOLI
  * Joyería Fina & Accesorios (@inveranoli2017)
  */
 
@@ -54,8 +54,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   // 9. Sincronizar datos de la tienda en el pie de página
   var elRif = document.getElementById('footer-rif');
-  if (elRif && typeof INEVAROLI_CONFIG !== 'undefined' && INEVAROLI_CONFIG.rif) {
-    elRif.textContent = INEVAROLI_CONFIG.rif;
+  if (elRif && typeof INVERANOLI_CONFIG !== 'undefined' && INVERANOLI_CONFIG.rif) {
+    elRif.textContent = INVERANOLI_CONFIG.rif;
   }
 });
 
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 function inicializarTemaVisual() {
   var temaGuardado = 'light';
   try {
-    temaGuardado = localStorage.getItem('inevaroli_tema') || 'light';
+    temaGuardado = localStorage.getItem('inveranoli_tema') || 'light';
   } catch (e) {}
 
   aplicarTemaVisual(temaGuardado);
@@ -74,7 +74,7 @@ function alternarTemaVisual() {
   var nuevo = actual === 'dark' ? 'light' : 'dark';
   aplicarTemaVisual(nuevo);
   try {
-    localStorage.setItem('inevaroli_tema', nuevo);
+    localStorage.setItem('inveranoli_tema', nuevo);
   } catch (e) {}
 }
 

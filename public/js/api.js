@@ -1,12 +1,12 @@
 /**
- * api.js — Capa de Almacenamiento y Persistencia Robusta para INEVAROLI
+ * api.js — Capa de Almacenamiento y Persistencia Robusta para INVERANOLI
  * Diseñado para funcionar 100% offline, en Windows 7 y navegadores ligeros
  * sin dependencias ni servidores locales.
  */
 var Api = (function () {
   'use strict';
 
-  var PREFIX = 'inevaroli_';
+  var PREFIX = 'inveranoli_';
   var MEMORY_CACHE = {};
 
   function prefixedKey(key) {
