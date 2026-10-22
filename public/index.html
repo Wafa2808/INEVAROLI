@@ -20,15 +20,6 @@
     <div class="amz-header-top">
       <!-- Marca y Logotipo -->
       <div class="amz-brand-zone">
-        <button type="button" id="btn-menu-lateral" class="amz-btn-menu" aria-label="Abrir menú" title="Menú de colecciones">
-          <span class="amz-menu-icon" aria-hidden="true">
-            <span></span>
-            <span></span>
-            <span></span>
-          </span>
-          <span class="amz-menu-text">Todo</span>
-        </button>
-
         <div class="amz-logo-box" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
           <img src="logo.png" alt="Logotipo Oficial INEVAROLI Joyería" class="amz-brand-logo">
           <div class="amz-brand-info">
@@ -150,19 +141,29 @@
     </div>
   </header>
 
-  <!-- ─── Banner Hero Showcase (Carrusel Principal) ─── -->
+  <!-- ─── Banner Hero Showcase (Carrusel Principal Premium de Alta Joyería) ─── -->
   <section class="hero-showcase" id="hero-slider">
     <!-- Slide 1: Anillos de Grado 2026 -->
     <div class="hero-slide activo">
       <img src="images/banner_grado.jpg" alt="Anillos de Grado INEVAROLI" class="hero-bg-img">
       <div class="hero-overlay"></div>
       <div class="hero-content">
-        <span class="hero-tag">COLECCIÓN OFICIAL DE GRADO 2026</span>
+        <div class="hero-badge-wrap">
+          <span class="hero-tag">🎓 PROMOCIÓN OFICIAL 2026</span>
+          <span class="hero-subtag">Plata Ley 925 & Oro 18K</span>
+        </div>
         <h2 class="hero-title">Anillos de Grado Bachiller & Universitarios</h2>
-        <p class="hero-desc">Fabricados a la medida en Plata Ley 925 y Acero Quirúrgico 316L. Modelos oficiales para UC, UAM, UJAP, Medicina, Derecho e Ingeniería con grabado de cortesía y estuche de pana.</p>
+        <p class="hero-desc">Modelos oficiales y personalizados para <strong>UC, UAM, UJAP, Medicina, Odontología, Derecho e Ingeniería</strong>. Acabado diamantado con relieve milimétrico, grabado interno de cortesía y estuche de pana conmemorativo.</p>
         <div class="hero-btn-group">
-          <button type="button" class="btn" onclick="seleccionarCategoria(1); document.getElementById('catalogo-header').scrollIntoView({behavior:'smooth'});">Explorar Grado</button>
-          <button type="button" class="btn btn-detalle" onclick="abrirGuiaTallasModal();">Ver Guía de Tallas</button>
+          <button type="button" class="btn btn-hero-gold" onclick="seleccionarCategoria(1); document.getElementById('catalogo-header').scrollIntoView({behavior:'smooth'});">Explorar Colección de Grado ›</button>
+          <button type="button" class="btn btn-hero-glass" onclick="abrirGuiaTallasModal();">📏 Medidor de Tallas</button>
+        </div>
+        <div class="hero-trust-bar">
+          <span class="hero-trust-item">✨ Grabado Láser Gratis</span>
+          <span class="hero-trust-sep">•</span>
+          <span class="hero-trust-item">🛡️ Garantía de Joyería</span>
+          <span class="hero-trust-sep">•</span>
+          <span class="hero-trust-item">📍 Taller en Valencia</span>
         </div>
       </div>
     </div>
@@ -172,12 +173,22 @@
       <img src="images/banner_bodas.jpg" alt="Alianzas y Anillos de Matrimonio" class="hero-bg-img">
       <div class="hero-overlay"></div>
       <div class="hero-content">
-        <span class="hero-tag">BODAS & COMPROMISO</span>
-        <h2 class="hero-title">Tríos Matrimoniales y Solitarios Exclusivos</h2>
-        <p class="hero-desc">Alianzas diamantadas y clásicas con grabado interior de nombres y fecha sin costo adicional. Símbolo inalterable de unión con circonias suizas corte brillante.</p>
+        <div class="hero-badge-wrap">
+          <span class="hero-tag">💍 BODAS & ALIANZAS ETERNAS</span>
+          <span class="hero-subtag">Amor Para Siempre</span>
+        </div>
+        <h2 class="hero-title">Tríos Matrimoniales & Solitarios Exclusivos</h2>
+        <p class="hero-desc">El símbolo perfecto de su promesa de amor. Alianzas clásicas confort-fit y diamantadas bicolor con solitario central en Circonia Suiza corte brillante y grabado personalizado de nombres y fecha.</p>
         <div class="hero-btn-group">
-          <button type="button" class="btn" onclick="seleccionarCategoria(4); document.getElementById('catalogo-header').scrollIntoView({behavior:'smooth'});">Ver Alianzas de Boda</button>
-          <button type="button" class="btn btn-detalle" onclick="seleccionarCategoria(3); document.getElementById('catalogo-header').scrollIntoView({behavior:'smooth'});">Anillos de Compromiso</button>
+          <button type="button" class="btn btn-hero-gold" onclick="seleccionarCategoria(4); document.getElementById('catalogo-header').scrollIntoView({behavior:'smooth'});">Ver Alianzas de Boda ›</button>
+          <button type="button" class="btn btn-hero-glass" onclick="seleccionarCategoria(3); document.getElementById('catalogo-header').scrollIntoView({behavior:'smooth'});">Anillos de Compromiso</button>
+        </div>
+        <div class="hero-trust-bar">
+          <span class="hero-trust-item">💎 Circonias Suizas AAA</span>
+          <span class="hero-trust-sep">•</span>
+          <span class="hero-trust-item">🎁 Estuche de Boda Incluido</span>
+          <span class="hero-trust-sep">•</span>
+          <span class="hero-trust-item">⚡ Entrega Inmediata</span>
         </div>
       </div>
     </div>
@@ -187,12 +198,22 @@
       <img src="images/banner_joyas.jpg" alt="Cadenas y Joyería Fina" class="hero-bg-img">
       <div class="hero-overlay"></div>
       <div class="hero-content">
-        <span class="hero-tag">ACERO QUIRÚRGICO 316L & PLATA 925</span>
-        <h2 class="hero-title">Cadenas Cubanas, Dijes & Esclavas</h2>
-        <p class="hero-desc">Accesorios hipoalergénicos que no manchan ni pierden el brillo. Tejido cubano, medallas devocionales de la Virgen del Socorro y esclavas grabables para dama y caballero.</p>
+        <div class="hero-badge-wrap">
+          <span class="hero-tag">✨ ALTA JOYERÍA URBANA & DEVOCIONAL</span>
+          <span class="hero-subtag">Acero 316L & Plata 925</span>
+        </div>
+        <h2 class="hero-title">Cadenas Cubanas, Dijes, Cruces & Esclavas</h2>
+        <p class="hero-desc">Piezas hipoalergénicas inalterables al sudor y perfumes. Cadenas Cuban Link macizas, dijes religiosos de la Virgen del Socorro y pulseras tenis con acabados de alta orfebrería.</p>
         <div class="hero-btn-group">
-          <button type="button" class="btn" onclick="seleccionarCategoria(5); document.getElementById('catalogo-header').scrollIntoView({behavior:'smooth'});">Ver Cadenas y Dijes</button>
-          <button type="button" class="btn btn-detalle" onclick="document.getElementById('ubicacion-tienda').scrollIntoView({behavior:'smooth'});">Visitar Tienda en Valencia</button>
+          <button type="button" class="btn btn-hero-gold" onclick="seleccionarCategoria(5); document.getElementById('catalogo-header').scrollIntoView({behavior:'smooth'});">Explorar Cadenas & Dijes ›</button>
+          <button type="button" class="btn btn-hero-glass" onclick="document.getElementById('ubicacion-tienda').scrollIntoView({behavior:'smooth'});">🏢 Visitar Nuestra Tienda</button>
+        </div>
+        <div class="hero-trust-bar">
+          <span class="hero-trust-item">💧 Inoxidable & Antialérgico</span>
+          <span class="hero-trust-sep">•</span>
+          <span class="hero-trust-item">💵 Precios en Tasa BCV</span>
+          <span class="hero-trust-sep">•</span>
+          <span class="hero-trust-item">📦 Envíos Nacionales</span>
         </div>
       </div>
     </div>

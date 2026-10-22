@@ -192,7 +192,7 @@ function renderAdminTabla() {
     }
 
     // Foto pequeña de previsualización
-    var foto = (p.imagenes && p.imagenes.length) ? p.imagenes[0] : 'images/prod_1_grado_bachiller_ciencias.svg';
+    var foto = (p.imagenes && p.imagenes.length) ? p.imagenes[0] : 'images/prod_1_grado_bachiller_ciencias.jpg';
 
     // Textos con contraste cristalino en modo claro y oscuro
     tr.innerHTML =
@@ -430,7 +430,7 @@ function guardarProductoAdmin(e) {
     return Notificaciones.alerta('El stock debe ser un entero no negativo.', 'Stock Inválido');
   }
 
-  var fotoFinal = imagenBase64Seleccionada || urlFoto || 'images/prod_1_grado_bachiller_ciencias.svg';
+  var fotoFinal = imagenBase64Seleccionada || urlFoto || 'images/prod_1_grado_bachiller_ciencias.jpg';
 
   if (id) {
     // Modo Edición
