@@ -29,11 +29,22 @@ var MotorSQL = (function () {
   function obtenerTabla(nombre) {
     var clave = claveTabla(nombre);
     
-    // Regla estricta: productos y categorías NO se leen de almacenamiento local persistente
-    // Dependen 100% de la conexión con el servidor de base de datos (puerto 3001)
+    // Productos y categorías: sincronizados con el servidor BD o cargados desde datos semilla locales
     if (nombre === 'productos' || nombre === 'categorias') {
-      if (typeof window !== 'undefined' && window._INVERANOLI_DB_STORE && Array.isArray(window._INVERANOLI_DB_STORE[clave])) {
+      if (typeof window !== 'undefined' && window._INVERANOLI_DB_STORE && Array.isArray(window._INVERANOLI_DB_STORE[clave]) && window._INVERANOLI_DB_STORE[clave].length > 0) {
         return window._INVERANOLI_DB_STORE[clave];
+      }
+      if (nombre === 'productos' && typeof PRODUCTOS_INICIALES !== 'undefined' && Array.isArray(PRODUCTOS_INICIALES) && PRODUCTOS_INICIALES.length > 0) {
+        if (typeof window !== 'undefined' && window._INVERANOLI_DB_STORE) {
+          window._INVERANOLI_DB_STORE[clave] = PRODUCTOS_INICIALES.slice();
+        }
+        return PRODUCTOS_INICIALES;
+      }
+      if (nombre === 'categorias' && typeof CATEGORIAS_INICIALES !== 'undefined' && Array.isArray(CATEGORIAS_INICIALES) && CATEGORIAS_INICIALES.length > 0) {
+        if (typeof window !== 'undefined' && window._INVERANOLI_DB_STORE) {
+          window._INVERANOLI_DB_STORE[clave] = CATEGORIAS_INICIALES.slice();
+        }
+        return CATEGORIAS_INICIALES;
       }
       return [];
     }
@@ -394,45 +405,79 @@ var MotorSQL = (function () {
     inicializarDatosMaestros(false);
   } catch (e) {}
 
-  // Sincroniza productos y categorías directamente desde el Servidor de Base de Datos (puerto 3001)
+  // Sincroniza productos y categorías directamente desde el Servidor de Base de Datos
+  // Soporta conexión multi-candidato inteligente para Windows 7 (mismo origen, 127.0.0.1 y localhost)
   async function sincronizarDesdeServidorBD(urlServidor) {
-    var url = urlServidor || 'http://localhost:3001/api/database';
-    try {
-      var resp = await fetch(url + '?t=' + Date.now(), { cache: 'no-store' });
-      if (!resp.ok) {
-        throw new Error('Servidor de base de datos respondió con código ' + resp.status);
-      }
-      var datos = await resp.json();
-      if (datos && datos.disponible && Array.isArray(datos.productos)) {
-        persistirTabla('categorias', datos.categorias || []);
-        persistirTabla('productos', datos.productos || []);
-        return {
-          conectado: true,
-          productos: datos.productos.length,
-          categorias: (datos.categorias || []).length
-        };
-      } else {
-        // Servidor respondió pero sin datos o archivo no disponible
-        persistirTabla('categorias', []);
-        persistirTabla('productos', []);
-        return {
-          conectado: false,
-          productos: 0,
-          categorias: 0,
-          mensaje: datos && datos.mensaje ? datos.mensaje : 'Base de datos vacía o no disponible'
-        };
-      }
-    } catch (err) {
-      // Servidor de base de datos no está levantado
-      persistirTabla('categorias', []);
-      persistirTabla('productos', []);
-      return {
-        conectado: false,
-        productos: 0,
-        categorias: 0,
-        error: err.message
-      };
+    var candidatos = [];
+
+    // 1. Si se pasó una URL específica, intentarla primero
+    if (urlServidor) {
+      candidatos.push(urlServidor);
     }
+
+    // 2. Mismo origen relativo (puerto actual, ej. 3000). Sin CORS y con latencia 0.
+    if (typeof window !== 'undefined' && window.location && window.location.origin && window.location.origin.indexOf('http') === 0) {
+      candidatos.push(window.location.origin + '/api/database');
+      if (window.location.hostname) {
+        candidatos.push('http://' + window.location.hostname + ':3001/api/database');
+      }
+    }
+
+    // 3. Fallbacks directos por IP 127.0.0.1 (evita resolución fallida de IPv6 en Windows 7)
+    candidatos.push('http://127.0.0.1:3001/api/database');
+    candidatos.push('http://127.0.0.1:3000/api/database');
+
+    // 4. Fallbacks por localhost
+    candidatos.push('http://localhost:3001/api/database');
+    candidatos.push('http://localhost:3000/api/database');
+
+    // Filtrar candidatos únicos manteniendo orden
+    var urls = [];
+    for (var i = 0; i < candidatos.length; i++) {
+      if (urls.indexOf(candidatos[i]) === -1) {
+        urls.push(candidatos[i]);
+      }
+    }
+
+    var ultimoError = 'Servidor de base de datos no disponible';
+
+    for (var j = 0; j < urls.length; j++) {
+      var candidateUrl = urls[j];
+      try {
+        var sep = candidateUrl.indexOf('?') === -1 ? '?' : '&';
+        var resp = await fetch(candidateUrl + sep + 't=' + Date.now(), { cache: 'no-store' });
+        if (resp && resp.ok) {
+          var datos = await resp.json();
+          if (datos && datos.disponible && Array.isArray(datos.productos)) {
+            persistirTabla('categorias', datos.categorias || []);
+            persistirTabla('productos', datos.productos || []);
+            return {
+              conectado: true,
+              productos: datos.productos.length,
+              categorias: (datos.categorias || []).length,
+              url_origen: candidateUrl
+            };
+          }
+        }
+      } catch (e) {
+        ultimoError = e.message || 'Error al conectar';
+      }
+    }
+
+    // Si ningún servidor respondió, usar contingencia de datos semilla locales (modo offline / file:///)
+    var fallbackProds = (typeof PRODUCTOS_INICIALES !== 'undefined' && Array.isArray(PRODUCTOS_INICIALES)) ? PRODUCTOS_INICIALES : [];
+    var fallbackCats = (typeof CATEGORIAS_INICIALES !== 'undefined' && Array.isArray(CATEGORIAS_INICIALES)) ? CATEGORIAS_INICIALES : [];
+    if (fallbackProds.length > 0) {
+      persistirTabla('categorias', fallbackCats);
+      persistirTabla('productos', fallbackProds);
+    }
+    return {
+      conectado: false,
+      modo_local: fallbackProds.length > 0,
+      productos: fallbackProds.length,
+      categorias: fallbackCats.length,
+      error: ultimoError
+    };
   }
 
   return {

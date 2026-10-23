@@ -11,11 +11,12 @@ Diseñado y optimizado para ejecutarse **100% de manera local y sin dependencias
 ## 🚀 Cómo ejecutar el proyecto
 
 ### Opción 1: Servidor Integrado en Python (¡Recomendado para presentaciones!)
-**100% libre de Node.js, npm o pip.** Funciona con cualquier versión de Python (Python 2.7 o Python 3.x) en **Windows 7, 8, 10 u 11** sin permisos de administrador:
+**100% libre de Node.js, npm o pip.** Totalmente compatible y probado con **Python 3.6** (y 2.7 / 3.x) en **Windows 7, 8, 10 u 11** sin permisos de administrador:
 1. Haz doble clic en el archivo: **`iniciar_servidor_python.bat`** (o ejecuta en terminal `python servidor_completo.py`).
-2. Se levantará automáticamente:
-   - 🌐 **Web:** `http://localhost:3000` (se abrirá en tu navegador de inmediato).
-   - 🗄️ **Base de Datos:** `http://localhost:3001/api/database` vinculada en tiempo real con `database/schema.sql`.
+2. El script detecta automáticamente Python incluso si no fue agregado a la variable PATH durante la instalación de Windows 7.
+3. Se levantará automáticamente:
+   - 🌐 **Web:** `http://127.0.0.1:3000` (se abrirá en tu navegador de inmediato).
+   - 🗄️ **Base de Datos:** `http://127.0.0.1:3000/api/database` y puerto dual `3001` vinculados con `database/schema.sql`.
 
 ### Opción 2: Sin servidores (Doble Clic Directo en HTML)
 1. Navegar a la carpeta `INVERANOLI/public`.

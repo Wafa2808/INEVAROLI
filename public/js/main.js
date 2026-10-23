@@ -94,14 +94,22 @@ function aplicarTemaVisual(tema) {
 async function intentarSincronizacionServidorBD() {
   if (typeof MotorSQL === 'undefined') return;
 
-  var res = await MotorSQL.sincronizarDesdeServidorBD('http://localhost:3001/api/database');
+  var res = await MotorSQL.sincronizarDesdeServidorBD();
   
   // Actualizar indicador visual de base de datos en pantalla si existe
   var statusWidget = document.getElementById('estado-servidor-db-badge');
   if (statusWidget) {
     if (res.conectado) {
       statusWidget.className = 'servidor-badge conectado';
+      statusWidget.style.background = '';
+      statusWidget.style.color = '';
       statusWidget.innerHTML = '● Servidor BD Conectado (' + res.productos + ' joyas)';
+    } else if (res.modo_local || res.productos > 0) {
+      statusWidget.className = 'servidor-badge local';
+      statusWidget.style.background = 'rgba(37, 99, 235, 0.2)';
+      statusWidget.style.color = '#38bdf8';
+      statusWidget.style.border = '1px solid #38bdf8';
+      statusWidget.innerHTML = '● Base de Datos Local (' + res.productos + ' joyas)';
     } else {
       statusWidget.className = 'servidor-badge desconectado';
       statusWidget.innerHTML = '○ Servidor BD Desconectado (0 joyas)';

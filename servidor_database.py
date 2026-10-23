@@ -14,13 +14,12 @@ import sys
 import json
 import re
 
-# Compatibilidad con consolas Windows (evitar caidas por codificacion de caracteres)
+# Compatibilidad segura con consolas Windows (Python 3.6+, Windows 7)
 try:
-    if sys.stdout.encoding != 'utf-8':
-        if hasattr(sys.stdout, 'reconfigure'):
-            sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-        if hasattr(sys.stderr, 'reconfigure'):
-            sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    if hasattr(sys.stderr, 'reconfigure'):
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 except Exception:
     pass
 
@@ -31,6 +30,10 @@ if sys.version_info[0] >= 3:
 else:
     from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
     from urlparse import urlparse
+
+class ReusableHTTPServer(HTTPServer):
+    allow_reuse_address = True
+    daemon_threads = True
 
 PORT_DB = 3001
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -173,19 +176,24 @@ class ManejadorBD(BaseHTTPRequestHandler):
         self.send_response(204)
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
+        self.send_header('Content-Length', '0')
         self.end_headers()
 
     def responder_json(self, status, objeto):
-        cuerpo = json.dumps(objeto, ensure_ascii=False).encode('utf-8')
-        self.send_response(status)
-        self.send_header('Content-Type', 'application/json; charset=utf-8')
-        self.send_header('Content-Length', str(len(cuerpo)))
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-        self.end_headers()
-        self.wfile.write(cuerpo)
+        try:
+            cuerpo = json.dumps(objeto, ensure_ascii=False).encode('utf-8')
+            self.send_response(status)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.send_header('Content-Length', str(len(cuerpo)))
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
+            self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            self.end_headers()
+            self.wfile.write(cuerpo)
+        except (IOError, OSError):
+            pass
 
     def do_GET(self):
         parsed = urlparse(self.path)
@@ -260,28 +268,48 @@ class ManejadorBD(BaseHTTPRequestHandler):
                 total_cats,
                 PORT_DB
             )
-            cuerpo = html.encode('utf-8')
-            self.send_response(200)
-            self.send_header('Content-Type', 'text/html; charset=utf-8')
-            self.send_header('Content-Length', str(len(cuerpo)))
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.end_headers()
-            self.wfile.write(cuerpo)
+            try:
+                cuerpo = html.encode('utf-8')
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html; charset=utf-8')
+                self.send_header('Content-Length', str(len(cuerpo)))
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(cuerpo)
+            except (IOError, OSError):
+                pass
             return
 
         # 404
         self.responder_json(404, {'error': 'Ruta no encontrada'})
 
 
+def crear_servidor_bd(puerto=PORT_DB):
+    """Crea una instancia de servidor BD probando 0.0.0.0 y fallback a 127.0.0.1"""
+    for host in ('0.0.0.0', '127.0.0.1'):
+        try:
+            httpd = ReusableHTTPServer((host, puerto), ManejadorBD)
+            return httpd, host
+        except Exception:
+            continue
+    return None, None
+
+
 def ejecutar():
-    servidor = HTTPServer(('0.0.0.0', PORT_DB), ManejadorBD)
+    servidor, host = crear_servidor_bd(PORT_DB)
+    if not servidor:
+        print("[ERROR] No se pudo levantar el servidor en el puerto %d." % PORT_DB)
+        print("Es posible que otro proceso este utilizando el puerto %d." % PORT_DB)
+        return
+
     print("========================================================")
     print("INVERANOLI - SERVIDOR PYTHON DE BASE DE DATOS")
     print("========================================================")
-    print("Servidor Python activo en: http://localhost:%d" % PORT_DB)
-    print("Endpoint API de BD:       http://localhost:%d/api/database" % PORT_DB)
-    print("Compatible con Windows 7 en adelante (Cero dependencias)")
-    print("No requiere permisos de administrador ni paquetes pip")
+    print("Servidor Python activo en: http://127.0.0.1:%d" % PORT_DB)
+    print("Endpoint API de BD:       http://127.0.0.1:%d/api/database" % PORT_DB)
+    print("Escuchando en:            %s:%d" % (host, PORT_DB))
+    print("Compatible con Python 3.6 y Windows 7 en adelante")
+    print("Cero dependencias externas (sin pip ni node)")
     print("--------------------------------------------------------")
     print("Presiona Ctrl+C para detener el servidor.")
     print("========================================================\n")

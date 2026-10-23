@@ -745,7 +745,7 @@ function procesarArchivoSQLAdmin(evento) {
 async function recargarCatalogoDesdeServidorSQL() {
   var box = document.getElementById('admin-sql-resultado');
   try {
-    var res = await MotorSQL.sincronizarDesdeServidorBD('http://localhost:3001/api/database');
+    var res = await MotorSQL.sincronizarDesdeServidorBD();
     if (res && res.conectado) {
       if (typeof renderProductos === 'function') renderProductos();
       if (typeof renderAdminTabla === 'function') renderAdminTabla();
