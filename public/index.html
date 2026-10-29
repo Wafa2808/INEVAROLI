@@ -61,11 +61,11 @@
       </div>
 
       <!-- Tasa Oficial BCV Integrada -->
-      <div class="amz-bcv-box" id="bcv-widget" title="Tasa oficial Banco Central de Venezuela. Clic para refrescar." onclick="TasaBCV.refrescar()">
+      <div class="amz-bcv-box" id="bcv-widget" title="Tasa oficial Banco Central de Venezuela (www.bcv.org.ve). Clic para refrescar." onclick="TasaBCV.refrescar()">
         <span class="amz-bcv-tag">BCV VZLA</span>
         <div class="amz-bcv-data">
-          <span id="bcv-valor-tasa" class="amz-bcv-val">Bs. 880.12</span>
-          <small id="bcv-fecha-tasa" class="amz-bcv-sub">Oficial</small>
+          <span id="bcv-valor-tasa" class="amz-bcv-val">Cargando...</span>
+          <small id="bcv-fecha-tasa" class="amz-bcv-sub">Oficial BCV</small>
         </div>
         <button type="button" class="amz-bcv-refresh">⟳</button>
       </div>
@@ -236,7 +236,7 @@
           <p class="amz-card-sub">Bachiller y Universidad en Plata Ley 925</p>
         </div>
         <div class="amz-card-media">
-          <img src="images/prod_1_grado_bachiller_ciencias.jpg" alt="Anillo de Grado Bachiller" loading="lazy">
+          <img id="showcase-img-grado" src="logo.png" alt="Anillo de Grado Bachiller" loading="lazy">
         </div>
         <div class="amz-card-footer">
           <span class="amz-card-action">Explorar modelos oficiales ›</span>
@@ -251,7 +251,7 @@
           <p class="amz-card-sub">Tríos y pares con grabado de nombres gratis</p>
         </div>
         <div class="amz-card-media">
-          <img src="images/prod_13_trio_matrimonial.jpg" alt="Trío Matrimonial" loading="lazy">
+          <img id="showcase-img-bodas" src="logo.png" alt="Trío Matrimonial" loading="lazy">
         </div>
         <div class="amz-card-footer">
           <span class="amz-card-action">Ver alianzas y tríos ›</span>
@@ -266,7 +266,7 @@
           <p class="amz-card-sub">Circonias corte diamante y acabados en oro</p>
         </div>
         <div class="amz-card-media">
-          <img src="images/prod_9_solitario_clasico.jpg" alt="Anillo Solitario Clásico" loading="lazy">
+          <img id="showcase-img-compromiso" src="logo.png" alt="Anillo Solitario Clásico" loading="lazy">
         </div>
         <div class="amz-card-footer">
           <span class="amz-card-action">Descubrir solitarios ›</span>
@@ -281,7 +281,7 @@
           <p class="amz-card-sub">Acero dorado y plateado que no pierde brillo</p>
         </div>
         <div class="amz-card-media">
-          <img src="images/prod_16_cadena_cubana.jpg" alt="Cadena Cubana Acero Dorado" loading="lazy">
+          <img id="showcase-img-acero" src="logo.png" alt="Cadena Cubana Acero Dorado" loading="lazy">
         </div>
         <div class="amz-card-footer">
           <span class="amz-card-action">Ver cadenas y dijes ›</span>
@@ -296,7 +296,7 @@
           <p class="amz-card-sub">Argollas y abridores delicados de diario</p>
         </div>
         <div class="amz-card-media">
-          <img src="images/prod_20_medalla_virgen_socorro.jpg" alt="Medalla Virgen del Socorro y Accesorios" loading="lazy">
+          <img id="showcase-img-aretes" src="logo.png" alt="Medalla Virgen del Socorro y Accesorios" loading="lazy">
         </div>
         <div class="amz-card-footer">
           <span class="amz-card-action">Ver aretes y dijes ›</span>
@@ -449,7 +449,7 @@
       <div class="auth-brand-side">
         <div>
           <div class="auth-brand-logo-wrap">
-            <img src="images/logo.png" alt="INVERANOLI Joyería" class="auth-brand-logo-img">
+            <img src="logo.png" alt="INVERANOLI Joyería" class="auth-brand-logo-img">
             <h3 class="auth-brand-titulo">INVERANOLI</h3>
             <p class="auth-brand-subtitulo">Atelier de Joyería & Orfebrería</p>
           </div>
@@ -483,9 +483,19 @@
         </div>
 
         <!-- Formulario Login -->
-        <form id="form-login">
-          <label for="login-cedula">Cédula de Identidad</label>
-          <input type="text" id="login-cedula" placeholder="7 u 8 dígitos (Ej. 12345678 o 20123456)" maxlength="8" required>
+        <form id="form-login" onsubmit="event.preventDefault(); if(typeof procesarLogin==='function') procesarLogin(event);">
+          <label for="login-cedula">Documento de Identidad / Cédula / RIF</label>
+          <div style="display:flex; gap:8px; margin-bottom:12px;">
+            <select id="login-tipo-doc" class="select-prefijo" style="width:130px; font-weight:700;" required>
+              <option value="V" selected>V - Venezolano</option>
+              <option value="E">E - Extranjero</option>
+              <option value="RIF-V">RIF (V)</option>
+              <option value="RIF-E">RIF (E)</option>
+              <option value="J">J - Jurídico</option>
+              <option value="P">P - Pasaporte</option>
+            </select>
+            <input type="text" id="login-cedula" placeholder="Máx. 12 dígitos (solo números)" maxlength="12" onkeypress="return soloNumeros(event)" style="flex:1; margin-bottom:0;" required>
+          </div>
           
           <label for="login-pass">Contraseña</label>
           <input type="password" id="login-pass" placeholder="Ingresa tu contraseña" maxlength="16" required>
@@ -498,20 +508,30 @@
         </form>
 
         <!-- Formulario Registro de Cliente -->
-        <form id="form-registro" style="display:none;">
+        <form id="form-registro" style="display:none;" onsubmit="event.preventDefault(); if(typeof procesarRegistro==='function') procesarRegistro(event);">
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
             <div>
               <label for="reg-nombre">Nombres</label>
-              <input type="text" id="reg-nombre" placeholder="Solo letras" maxlength="35" required>
+              <input type="text" id="reg-nombre" placeholder="Solo letras" maxlength="35" onkeypress="return soloLetras(event)" required>
             </div>
             <div>
               <label for="reg-apellido">Apellidos</label>
-              <input type="text" id="reg-apellido" placeholder="Solo letras" maxlength="35" required>
+              <input type="text" id="reg-apellido" placeholder="Solo letras" maxlength="35" onkeypress="return soloLetras(event)" required>
             </div>
           </div>
 
-          <label for="reg-cedula">Cédula de Identidad</label>
-          <input type="text" id="reg-cedula" placeholder="7 u 8 dígitos numéricos" maxlength="8" required>
+          <label for="reg-cedula">Documento de Identidad / Cédula / RIF</label>
+          <div style="display:flex; gap:8px; margin-bottom:12px;">
+            <select id="reg-tipo-doc" class="select-prefijo" style="width:130px; font-weight:700;" required>
+              <option value="V" selected>V - Venezolano</option>
+              <option value="E">E - Extranjero</option>
+              <option value="RIF-V">RIF (V)</option>
+              <option value="RIF-E">RIF (E)</option>
+              <option value="J">J - Jurídico</option>
+              <option value="P">P - Pasaporte</option>
+            </select>
+            <input type="text" id="reg-cedula" placeholder="Máx. 12 dígitos (solo números)" maxlength="12" onkeypress="return soloNumeros(event)" style="flex:1; margin-bottom:0;" required>
+          </div>
 
           <label for="reg-telefono">Teléfono Móvil (+58)</label>
           <div class="telefono-input-group">
@@ -542,7 +562,7 @@
         </form>
 
         <!-- Formulario Recuperación de Contraseña -->
-        <form id="form-recuperar" style="display:none;">
+        <form id="form-recuperar" style="display:none;" onsubmit="event.preventDefault(); if(typeof procesarRecuperacion==='function') procesarRecuperacion(event);">
           <h4 style="color:var(--gold-light); margin-bottom:8px; font-size:1.1rem;">Recuperación Segura</h4>
           <p style="font-size:0.86rem; color:var(--text-muted); margin-bottom:14px;">
             Ingresa tu correo registrado para recibir instrucciones de restablecimiento.
@@ -587,15 +607,18 @@
       <!-- Ficha de Especificaciones de Joyería -->
       <div class="detalle-specs-grid">
         <div><strong>Piedras / Gemas:</strong> <span id="detalle-piedras"></span></div>
-        <div><strong>Tallas Disponibles:</strong> <span id="detalle-tallas"></span></div>
-        <div><strong>Grabado Interior:</strong> <span style="color:#10b981;">Gratis incluido</span></div>
+        <div><strong>Material / Acabado:</strong> <span id="detalle-specs-material"></span></div>
+        <div><strong>Garantía:</strong> <span style="color:#10b981;">Certificada de Taller</span></div>
         <div><strong>Estuche de Presentación:</strong> <span style="color:#10b981;">De pana incluido</span></div>
       </div>
 
-      <!-- Campo Opcional de Personalización de Grabado -->
-      <div style="margin-bottom:14px;">
-        <label for="detalle-grabado-input" style="font-size:0.82rem; font-weight:700; color:var(--gold-light);">Inscripción o Grabado Personalizado (Opcional):</label>
-        <input type="text" id="detalle-grabado-input" placeholder="Ej: Lic. Mauricio C. / Boda 2026 / 15-10-26" maxlength="35">
+      <!-- Selector Obligatorio de Talla Disponible en Stock -->
+      <div style="margin-bottom:14px; background:rgba(212,175,55,0.06); padding:12px; border-radius:var(--radius-sm); border:1px solid var(--border-gold);">
+        <label for="detalle-talla-select" style="font-size:0.85rem; font-weight:800; color:var(--gold-light); display:flex; justify-content:space-between;">
+          <span>Seleccionar Talla Disponible:</span>
+          <span id="detalle-talla-stock-info" style="color:#10b981; font-weight:700;"></span>
+        </label>
+        <select id="detalle-talla-select" style="width:100%; margin-top:6px; padding:10px; border-radius:6px; border:1px solid var(--border-gold); background:var(--bg-secondary); color:var(--text-primary); font-weight:700; font-size:0.95rem;" onchange="actualizarStockTallaSeleccionada()"></select>
       </div>
 
       <!-- Precios -->
@@ -679,7 +702,7 @@
     <div class="modal-caja">
       <button type="button" class="modal-cerrar" onclick="cerrarPerfilModal()">×</button>
       <h3>Mi Perfil de Usuario</h3>
-      <form id="form-perfil">
+      <form id="form-perfil" onsubmit="event.preventDefault(); if(typeof guardarCambiosPerfil==='function') guardarCambiosPerfil(event);">
         <label for="perfil-nombre">Nombres</label>
         <input type="text" id="perfil-nombre" maxlength="35" required>
         
@@ -898,29 +921,78 @@
   <div id="modal-admin" class="modal-fondo" style="display:none;">
     <div class="modal-caja admin-modal-caja">
       <button type="button" class="modal-cerrar" onclick="cerrarAdminModal()">×</button>
-      <h3 style="text-align:left; color:var(--gold-light); margin-bottom:14px;">Panel de Administración — INVERANOLI Joyería</h3>
 
-      <!-- Pestañas del Panel Admin -->
+      <!-- Encabezado Limpio del Administrador (Nombre Tienda, Logo, Bienvenido Administrador, Botón Perfil, Tasa BCV) -->
+      <div class="admin-header-limpio">
+        <div class="admin-header-brand">
+          <img src="logo.png" alt="Logo INVERANOLI" class="admin-header-logo">
+          <div>
+            <h3 style="color:var(--gold-light); margin:0; font-size:1.25rem;">INVERANOLI JOYERÍA</h3>
+            <span style="color:#10b981; font-weight:700; font-size:0.9rem;">● Bienvenido Administrador</span>
+          </div>
+        </div>
+        <div class="admin-header-controles">
+          <div class="amz-bcv-box" id="admin-bcv-widget" title="Tasa oficial BCV" style="margin:0;">
+            <span class="amz-bcv-tag">BCV</span>
+            <div class="amz-bcv-data">
+              <span id="admin-bcv-val" class="amz-bcv-val">Cargando...</span>
+              <small class="amz-bcv-sub">Oficial</small>
+            </div>
+          </div>
+          <button type="button" class="btn btn-sm btn-detalle" onclick="abrirPerfilModal()" title="Modificar datos del administrador">
+            👤 Mi Perfil
+          </button>
+          <button type="button" class="btn btn-sm amz-logout-btn" onclick="cerrarSesion()" title="Cerrar sesión de administrador" style="background:rgba(239,68,68,0.15); border:1px solid #ef4444; color:#ef4444; font-weight:700;">
+            🚪 Salir
+          </button>
+        </div>
+      </div>
+
+      <!-- Dashboard Financiero de 4 Columnas -->
+      <div class="admin-dashboard-grid">
+        <div class="admin-dash-card admin-dash-total">
+          <div class="admin-dash-label">Dinero Total</div>
+          <div class="admin-dash-val" id="dash-dinero-total">$0.00</div>
+          <div class="admin-dash-sub">Ganancia − Gastos</div>
+        </div>
+        <div class="admin-dash-card admin-dash-ganancia">
+          <div class="admin-dash-label">Ganancia</div>
+          <div class="admin-dash-val" id="dash-ganancia" style="color:#10b981;">$0.00</div>
+          <div class="admin-dash-sub">Pedidos validados</div>
+        </div>
+        <div class="admin-dash-card admin-dash-gastos">
+          <div class="admin-dash-label">Gastos</div>
+          <div class="admin-dash-val" id="dash-gastos" style="color:#ef4444;">$0.00</div>
+          <div class="admin-dash-sub">Pedidos de fábrica</div>
+        </div>
+        <div class="admin-dash-card admin-dash-pendiente">
+          <div class="admin-dash-label">Pendiente</div>
+          <div class="admin-dash-val" id="dash-pendiente" style="color:#f59e0b;">$0.00</div>
+          <div class="admin-dash-sub">Por validar pago</div>
+        </div>
+      </div>
+
+      <!-- 4 Botones con Menús / Pestañas Desplegables -->
       <div class="admin-tabs">
         <button type="button" id="tab-admin-productos" class="admin-tab-btn activo" onclick="cambiarSeccionAdmin('productos')">
-          Inventario de Joyas & Stock
+          💎 1. Inventario de Joyas & Stock
         </button>
         <button type="button" id="tab-admin-categorias" class="admin-tab-btn" onclick="cambiarSeccionAdmin('categorias')">
-          Gestión de Categorías
+          📁 2. Gestión de Categorías
         </button>
         <button type="button" id="tab-admin-pedidos" class="admin-tab-btn" onclick="cambiarSeccionAdmin('pedidos')">
-          Pedidos de Clientes
+          🛍️ 3. Pedidos de Clientes
         </button>
-        <button type="button" id="tab-admin-basedatos" class="admin-tab-btn" onclick="cambiarSeccionAdmin('basedatos')">
-          📁 Base de Datos (.sql)
+        <button type="button" id="tab-admin-fabricas" class="admin-tab-btn" onclick="cambiarSeccionAdmin('fabricas')">
+          🏭 4. Pedidos de Entrada
         </button>
       </div>
 
-      <!-- Sección 1: Inventario de Joyas -->
+      <!-- Boton 1: Inventario de Joyas & Stock -->
       <div id="admin-sec-productos">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
           <span style="font-size:0.88rem; color:var(--text-muted);">
-            Gestiona precios, añade stock con un clic y registra nuevas piezas para el catálogo.
+            Catálogo de joyas, precios de venta, estado activo/pausado y stock segmentado.
           </span>
           <button type="button" class="btn btn-sm" onclick="abrirFormularioProductoModal()">
             + Registrar Nueva Joya
@@ -937,7 +1009,7 @@
               <tr>
                 <th style="width:50px;">ID</th>
                 <th>Joya & Colección</th>
-                <th>Precio USD</th>
+                <th>Precio Venta</th>
                 <th>Destacado</th>
                 <th>Stock</th>
                 <th>Estado</th>
@@ -949,7 +1021,7 @@
         </div>
       </div>
 
-      <!-- Sección 2: Gestión de Categorías -->
+      <!-- Boton 2: Gestión de Categorías -->
       <div id="admin-sec-categorias" style="display:none;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
           <span style="font-size:0.88rem; color:var(--text-muted);">Grupos y colecciones de joyería (Grado, Bodas, Acero, etc.)</span>
@@ -975,10 +1047,10 @@
         </div>
       </div>
 
-      <!-- Sección 3: Pedidos de Clientes -->
+      <!-- Boton 3: Pedidos de Clientes -->
       <div id="admin-sec-pedidos" style="display:none;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-          <span style="font-size:0.88rem; color:var(--text-muted);">Seguimiento y control de entrega de órdenes</span>
+          <span style="font-size:0.88rem; color:var(--text-muted);">Valida los pagos confirmados vía WhatsApp y actualiza los envíos.</span>
         </div>
 
         <div class="admin-barra-busqueda-wrap" style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -988,9 +1060,8 @@
           <div style="flex:1; min-width:160px;">
             <select id="admin-filtro-estado-pedido" class="admin-select-filtro" onchange="filtrarAdminPedidosEstado(this.value)">
               <option value="todos">Todos los Estados</option>
-              <option value="recibido">Recibido</option>
-              <option value="preparacion">En Taller / Ajuste</option>
-              <option value="camino">Listo / En Camino</option>
+              <option value="pendiente">Pendiente (Por Validar)</option>
+              <option value="en_camino">En Camino (Validado)</option>
               <option value="entregado">Entregado</option>
             </select>
           </div>
@@ -999,47 +1070,35 @@
         <div id="admin-pedidos-lista"></div>
       </div>
 
-      <!-- Sección 4: Gestión y Reactividad de Base de Datos (.sql) -->
-      <div id="admin-sec-basedatos" style="display:none;">
-        <div style="background:var(--bg-surface); padding:20px; border-radius:var(--radius-md); border:1px solid var(--border-gold); margin-bottom:16px;">
-          <h4 style="color:var(--gold-light); margin-bottom:8px; font-size:1.1rem; display:flex; align-items:center; gap:8px;">
-            <span>📁 Sincronización Directa de Base de Datos SQL</span>
-          </h4>
-          <p style="font-size:0.88rem; color:var(--text-secondary); line-height:1.5; margin-bottom:14px;">
-            El sistema opera con el esquema relacional <code style="background:rgba(0,0,0,0.15); padding:2px 6px; border-radius:4px; color:var(--gold-primary);">database/schema.sql</code>. Si el archivo no existe o se vacía, los productos desaparecen del catálogo; al volver a cargarlo, reaparecen de inmediato.
-          </p>
+      <!-- Boton 4: Pedidos de Entrada (Fábricas de Joyas) -->
+      <div id="admin-sec-fabricas" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+          <span style="font-size:0.88rem; color:var(--text-muted);">
+            Abastécete con joyas al por mayor de fábricas registradas.
+          </span>
+          <button type="button" class="btn btn-sm" onclick="abrirModalRegistrarFabrica()">
+            🏭 + Registrar Fábrica
+          </button>
+        </div>
 
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px;">
-            <!-- Opción A: Cargar archivo .sql desde el equipo -->
-            <div style="background:var(--bg-secondary); border:1px dashed var(--border-gold); padding:16px; border-radius:var(--radius-sm); text-align:center;">
-              <strong style="color:var(--text-primary); display:block; margin-bottom:6px; font-size:0.95rem;">📥 Cargar archivo schema.sql</strong>
-              <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">Selecciona el archivo .sql de tu computadora para restaurar o actualizar todos los productos al instante:</p>
-              <input type="file" id="admin-input-sql-file" accept=".sql" style="display:none;" onchange="procesarArchivoSQLAdmin(event)">
-              <button type="button" class="btn btn-sm" onclick="document.getElementById('admin-input-sql-file').click()" style="width:100%;">
-                📂 Elegir archivo .sql
-              </button>
-            </div>
+        <!-- Barra Buscadora y Selector de Fábricas -->
+        <div class="fabrica-search-bar">
+          <select id="admin-select-fabrica" onchange="seleccionarFabricaParaPedido(this.value)">
+            <option value="">-- Selecciona o busca una fábrica registrada --</option>
+          </select>
+          <button type="button" class="btn btn-sm btn-detalle" onclick="abrirCatalogoCompraFabrica()" id="btn-comprar-fabrica" disabled>
+            🛍️ Hacer Pedido a Fábrica
+          </button>
+        </div>
 
-            <!-- Opción B: Sincronización automática o vaciado de prueba -->
-            <div style="background:var(--bg-secondary); border:1px dashed var(--border-gold); padding:16px; border-radius:var(--radius-sm); display:flex; flex-direction:column; justify-content:space-between; gap:10px;">
-              <div>
-                <strong style="color:var(--text-primary); display:block; margin-bottom:6px; font-size:0.95rem;">⚡ Acciones Rápidas</strong>
-                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">Prueba la reactividad del catálogo en vivo:</p>
-              </div>
-              <div style="display:flex; flex-direction:column; gap:8px;">
-                <button type="button" class="btn btn-sm btn-detalle" onclick="recargarCatalogoDesdeServidorSQL()" style="width:100%;">
-                  🔄 Recargar database/schema.sql
-                </button>
-                <button type="button" class="btn btn-sm btn-rojo" onclick="simularBorradoBaseDeDatos()" style="width:100%;">
-                  🗑️ Simular Borrado (Vaciar Productos)
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div id="admin-sql-resultado" style="margin-top:14px; font-size:0.86rem; padding:10px 14px; border-radius:var(--radius-sm); display:none;"></div>
+        <h4 style="color:var(--gold-light); margin-top:20px; margin-bottom:10px; font-size:1.05rem;">
+          Registro de Pedidos de Entrada a Fábricas
+        </h4>
+        <div id="admin-pedidos-entrada-lista" class="pedidos-entrada-lista">
+          <div style="text-align:center; padding:20px; color:var(--text-muted);">No hay pedidos de entrada registrados aún.</div>
         </div>
       </div>
+
     </div>
   </div>
 
@@ -1063,24 +1122,21 @@
           </div>
         </div>
 
-        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
           <div>
             <label for="form-prod-cat">Categoría</label>
             <select id="form-prod-cat" required></select>
           </div>
           <div>
-            <label for="form-prod-precio">Precio USD ($)</label>
-            <input type="number" id="form-prod-precio" step="0.01" min="0.01" placeholder="35.00" required>
+            <label for="form-prod-precio">Precio de Venta al Cliente ($ USD)</label>
+            <input type="number" id="form-prod-precio" step="0.01" min="0.01" placeholder="30.00" required>
           </div>
-          <div>
-            <label for="form-prod-stock">Stock Inicial</label>
-            <input type="number" id="form-prod-stock" min="0" value="15" required>
-          </div>
+          <input type="hidden" id="form-prod-stock" value="0">
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
           <div>
-            <label for="form-prod-tallas">Tallas / Medidas</label>
+            <label for="form-prod-tallas">Tallas / Medidas Disponibles</label>
             <input type="text" id="form-prod-tallas" placeholder="Ej. 6 a la 11 / Ajustable">
           </div>
           <div>
@@ -1091,7 +1147,7 @@
         </div>
 
         <label for="form-prod-desc">Descripción Detallada</label>
-        <textarea id="form-prod-desc" rows="3" placeholder="Detalles de la joya, grabado, estuche..."></textarea>
+        <textarea id="form-prod-desc" rows="3" placeholder="Detalles de la joya, garantía, presentación..."></textarea>
 
         <div style="margin:8px 0;">
           <label style="cursor:pointer; display:flex; align-items:center; gap:8px;">
@@ -1111,8 +1167,98 @@
           <span id="form-prod-preview-text" style="color:var(--text-muted); font-size:0.82rem;">Vista previa de la joya</span>
         </div>
 
-        <button type="submit" class="btn" style="width:100%;">Guardar Joya en el Inventario</button>
+        <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:12px;">
+          <em>Nota comercial: Al registrar una nueva joya ingresa con stock 0. Podrás adquirir unidades al por mayor mediante el botón <strong>"Pedidos de Entrada"</strong>.</em>
+        </p>
+
+        <button type="submit" class="btn" style="width:100%;">Guardar Joya en el Catálogo</button>
       </form>
+    </div>
+  </div>
+
+  <!-- ─── Modal 10: Registrar Fábrica de Joyas ─── -->
+  <div id="modal-fabrica-registro" class="modal-fondo" style="display:none; z-index:2250;">
+    <div class="modal-caja" style="max-width:550px;">
+      <button type="button" class="modal-cerrar" onclick="cerrarModalRegistrarFabrica()">×</button>
+      <h3 style="color:var(--gold-light); margin-bottom:14px;">Registrar Fábrica Mayorista de Joyas</h3>
+      <form id="form-registrar-fabrica" onsubmit="guardarNuevaFabrica(event)">
+        <div style="margin-bottom:10px;">
+          <label for="fab-nombre">Nombre de la Fábrica / Taller</label>
+          <input type="text" id="fab-nombre" placeholder="Ej. Orfebrería Caracas C.A." maxlength="70" required>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+          <div>
+            <label for="fab-rif">RIF de la Fábrica</label>
+            <input type="text" id="fab-rif" placeholder="J-12345678-9" maxlength="20" required>
+          </div>
+          <div>
+            <label for="fab-telefono">Teléfono de Contacto</label>
+            <input type="tel" id="fab-telefono" placeholder="04141234567" maxlength="15" onkeypress="return soloNumeros(event)" required>
+          </div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <label for="fab-direccion">Ubicación / Dirección de Despacho</label>
+          <input type="text" id="fab-direccion" placeholder="Ej. Zona Industrial Los Guayos, Carabobo" maxlength="120" required>
+        </div>
+        <div style="margin-bottom:14px;">
+          <label for="fab-contacto">Persona de Contacto / Asesor Mayorista</label>
+          <input type="text" id="fab-contacto" placeholder="Ej. Carlos Mendoza" maxlength="60" required>
+        </div>
+        <button type="submit" class="btn" style="width:100%;">Registrar Fábrica en el Sistema</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ─── Modal 11: Catálogo de Compra de Joyas a Fábrica (Pedidos de Entrada) ─── -->
+  <div id="modal-compra-fabrica" class="modal-fondo" style="display:none; z-index:2300;">
+    <div class="modal-caja" style="max-width:850px; width:95%;">
+      <button type="button" class="modal-cerrar" onclick="cerrarCatalogoCompraFabrica()">×</button>
+      <div style="border-bottom:1.5px solid var(--border-gold); padding-bottom:10px; margin-bottom:14px;">
+        <h3 id="compra-fabrica-titulo" style="color:var(--gold-light); margin:0;">Pedido de Entrada — Joyas al Mayor</h3>
+        <span id="compra-fabrica-subtitulo" style="color:var(--text-muted); font-size:0.88rem;">Fábrica: Seleccionada</span>
+      </div>
+
+      <p style="font-size:0.86rem; color:var(--text-secondary); margin-bottom:12px;">
+        Selecciona las joyas y cantidades a solicitar a la fábrica.
+      </p>
+
+      <div style="max-height:380px; overflow-y:auto; border:1px solid var(--border-gold); border-radius:6px; margin-bottom:14px;">
+        <table class="tabla-admin" style="width:100%;">
+          <thead>
+            <tr>
+              <th>Joya</th>
+              <th>Precio Venta</th>
+              <th>Costo Fábrica</th>
+              <th>Stock Actual</th>
+              <th style="width:140px;">Talla a Pedir</th>
+              <th style="width:110px;">Cantidad</th>
+            </tr>
+          </thead>
+          <tbody id="compra-fabrica-tabla-cuerpo"></tbody>
+        </table>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; border-top:1px solid var(--border-gold); padding-top:14px;">
+        <div>
+          <span style="font-size:0.9rem; color:var(--text-muted);">Total Inversión en Fábrica (Gasto):</span><br>
+          <strong id="compra-fabrica-total-usd" style="font-size:1.35rem; color:#ef4444;">$0.00</strong>
+        </div>
+        <button type="button" class="btn btn-sm btn-hero-gold" onclick="confirmarPedidoAFabrica()" style="padding:10px 24px; font-weight:800;">
+          🛒 Hacer Pedido a Fábrica
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Modal 12: Factura de Pedido a Fábrica (Mostrar Factura) ─── -->
+  <div id="modal-factura-fabrica" class="modal-fondo" style="display:none; z-index:2400;">
+    <div class="modal-caja" style="max-width:700px; width:95%; background:#ffffff; color:#0f172a;">
+      <button type="button" class="modal-cerrar" onclick="cerrarFacturaFabrica()" style="color:#0f172a;">×</button>
+      <div id="contenido-factura-imprimible" class="factura-imprimible"></div>
+      <div style="margin-top:16px; text-align:right;">
+        <button type="button" class="btn btn-sm btn-detalle" onclick="window.print()">🖨️ Imprimir Factura</button>
+        <button type="button" class="btn btn-sm" onclick="cerrarFacturaFabrica()" style="margin-left:8px;">Cerrar</button>
+      </div>
     </div>
   </div>
 

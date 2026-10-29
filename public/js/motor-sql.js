@@ -14,7 +14,7 @@
 var MotorSQL = (function () {
   'use strict';
 
-  var TABLAS = ['usuarios', 'categorias', 'productos', 'ordenes', 'detalle_ordenes'];
+  var TABLAS = ['usuarios', 'categorias', 'productos', 'ordenes', 'detalle_ordenes', 'fabricas', 'pedidos_entrada'];
 
   // Cache en memoria por si el navegador opera en modo estricto de file:///
   if (typeof window !== 'undefined' && !window._INVERANOLI_DB_STORE) {
@@ -28,28 +28,13 @@ var MotorSQL = (function () {
   // Obtiene los registros de una tabla
   function obtenerTabla(nombre) {
     var clave = claveTabla(nombre);
-    
-    // Productos y categorías: sincronizados con el servidor BD o cargados desde datos semilla locales
-    if (nombre === 'productos' || nombre === 'categorias') {
-      if (typeof window !== 'undefined' && window._INVERANOLI_DB_STORE && Array.isArray(window._INVERANOLI_DB_STORE[clave]) && window._INVERANOLI_DB_STORE[clave].length > 0) {
-        return window._INVERANOLI_DB_STORE[clave];
-      }
-      if (nombre === 'productos' && typeof PRODUCTOS_INICIALES !== 'undefined' && Array.isArray(PRODUCTOS_INICIALES) && PRODUCTOS_INICIALES.length > 0) {
-        if (typeof window !== 'undefined' && window._INVERANOLI_DB_STORE) {
-          window._INVERANOLI_DB_STORE[clave] = PRODUCTOS_INICIALES.slice();
-        }
-        return PRODUCTOS_INICIALES;
-      }
-      if (nombre === 'categorias' && typeof CATEGORIAS_INICIALES !== 'undefined' && Array.isArray(CATEGORIAS_INICIALES) && CATEGORIAS_INICIALES.length > 0) {
-        if (typeof window !== 'undefined' && window._INVERANOLI_DB_STORE) {
-          window._INVERANOLI_DB_STORE[clave] = CATEGORIAS_INICIALES.slice();
-        }
-        return CATEGORIAS_INICIALES;
-      }
-      return [];
+
+    // 1. Usar memoria de ventana si ya tiene datos
+    if (typeof window !== 'undefined' && window._INVERANOLI_DB_STORE && Array.isArray(window._INVERANOLI_DB_STORE[clave]) && window._INVERANOLI_DB_STORE[clave].length > 0) {
+      return window._INVERANOLI_DB_STORE[clave];
     }
 
-    // 1. Usar Api si está disponible
+    // 2. Usar Api si está disponible
     if (typeof Api !== 'undefined' && Api && typeof Api.leer === 'function') {
       var datosApi = Api.leer(clave, null);
       if (datosApi && Array.isArray(datosApi)) {
@@ -60,7 +45,7 @@ var MotorSQL = (function () {
       }
     }
 
-    // 2. Intentar localStorage directamente
+    // 3. Intentar localStorage directamente
     try {
       if (typeof localStorage !== 'undefined') {
         var raw = localStorage.getItem(clave);
@@ -76,7 +61,7 @@ var MotorSQL = (function () {
       }
     } catch (e) {}
 
-    // 3. Fallback en memoria de ventana
+    // 4. Fallback en memoria de ventana
     if (typeof window !== 'undefined' && window._INVERANOLI_DB_STORE && Array.isArray(window._INVERANOLI_DB_STORE[clave])) {
       return window._INVERANOLI_DB_STORE[clave];
     }
@@ -90,16 +75,6 @@ var MotorSQL = (function () {
     
     if (typeof window !== 'undefined' && window._INVERANOLI_DB_STORE) {
       window._INVERANOLI_DB_STORE[clave] = filas;
-    }
-
-    // Regla estricta: productos y categorías NO se guardan en almacenamiento local persistente
-    // Dependen 100% de la conexión con el servidor de base de datos (puerto 3001)
-    if (nombre === 'productos' || nombre === 'categorias') {
-      try {
-        if (typeof localStorage !== 'undefined') localStorage.removeItem(clave);
-        if (typeof sessionStorage !== 'undefined') sessionStorage.removeItem(clave);
-      } catch (e) {}
-      return;
     }
 
     if (typeof Api !== 'undefined' && Api && typeof Api.guardar === 'function') {
@@ -139,6 +114,12 @@ var MotorSQL = (function () {
     }
     filas.push(registro);
     persistirTabla(tabla, filas);
+
+    // Persistencia hacia el archivo schema.sql si es usuario, producto o fábrica
+    if (tabla === 'usuarios' || tabla === 'productos' || tabla === 'fabricas') {
+      sincronizarSentenciaSQLConServidor(tabla, 'INSERT', registro);
+    }
+
     return registro;
   }
 
@@ -197,27 +178,189 @@ var MotorSQL = (function () {
     var filas = obtenerTabla(tabla);
     var longitudInicial = filas.length;
     var filtradas;
+    var registrosEliminados = [];
+
     if (typeof filtro === 'function') {
       filtradas = filas.filter(function (reg) {
-        return !filtro(reg);
+        var excluir = filtro(reg);
+        if (excluir) registrosEliminados.push(reg);
+        return !excluir;
       });
     } else if (typeof filtro === 'object' && filtro !== null) {
       filtradas = filas.filter(function (reg) {
+        var match = true;
         for (var k in filtro) {
-          if (filtro.hasOwnProperty(k) && reg[k] === filtro[k]) {
-            return false;
+          if (filtro.hasOwnProperty(k) && reg[k] !== filtro[k]) {
+            match = false;
+            break;
           }
         }
-        return true;
+        if (match) registrosEliminados.push(reg);
+        return !match;
       });
     } else {
       filtradas = [];
+      registrosEliminados = filas.slice();
     }
     var eliminados = longitudInicial - filtradas.length;
     if (eliminados > 0) {
       persistirTabla(tabla, filtradas);
+
+      // Si se eliminan productos, recordar sus IDs para no resucitarlos al sincronizar con el servidor
+      if (tabla === 'productos') {
+        try {
+          var listaDel = [];
+          if (typeof localStorage !== 'undefined') {
+            var rawDel = localStorage.getItem('db_inveranoli_productos_eliminados');
+            if (rawDel) listaDel = JSON.parse(rawDel) || [];
+          }
+          registrosEliminados.forEach(function (r) {
+            if (r && r.id && listaDel.indexOf(r.id) === -1) {
+              listaDel.push(r.id);
+            }
+          });
+          if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('db_inveranoli_productos_eliminados', JSON.stringify(listaDel));
+          }
+        } catch (e) {}
+      }
     }
     return eliminados;
+  }
+
+  // Gestión formal de stock segmentado por tallas para joyería
+  function extraerListaTallas(tallasStr) {
+    var raw = tallasStr || '';
+    var m = raw.match(/Tallas?\s+(\d+)\s+a\s+la\s+(\d+)/i);
+    if (m) {
+      var min = parseInt(m[1], 10);
+      var max = parseInt(m[2], 10);
+      var list = [];
+      for (var i = min; i <= max; i++) list.push(String(i));
+      return list;
+    } else if (/para él y ella/i.test(raw)) {
+      return ['Talla 6', 'Talla 7', 'Talla 8', 'Talla 9', 'Talla 10', 'Talla 11'];
+    } else if (/17 cm y 19 cm/i.test(raw)) {
+      return ['17 cm', '19 cm'];
+    } else if (/ajustable/i.test(raw)) {
+      return ['19 cm', '21 cm'];
+    } else if (raw.indexOf(',') !== -1) {
+      return raw.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+    }
+    return ['Estándar'];
+  }
+
+  function obtenerStockTallas(producto) {
+    if (!producto) return {};
+    if (producto.stock_tallas && typeof producto.stock_tallas === 'object') {
+      return producto.stock_tallas;
+    }
+    if (typeof producto.stock_tallas === 'string') {
+      try {
+        var parseado = JSON.parse(producto.stock_tallas);
+        if (parseado && typeof parseado === 'object') {
+          producto.stock_tallas = parseado;
+          return parseado;
+        }
+      } catch (e) {}
+    }
+
+    var tallasList = extraerListaTallas(producto.tallas);
+    var res = {};
+    var baseStockPorTalla = 5;
+    tallasList.forEach(function (t) {
+      res[t] = baseStockPorTalla;
+    });
+
+    // Calcular el stock total sumando todas las tallas
+    var totalSuma = 0;
+    for (var k in res) {
+      if (res.hasOwnProperty(k)) totalSuma += Number(res[k]) || 0;
+    }
+    producto.stock_tallas = res;
+    producto.stock = totalSuma;
+
+    // Actualizar producto en la base de datos
+    actualizar('productos', function (p) { return p.id === producto.id; }, {
+      stock_tallas: res,
+      stock: totalSuma
+    });
+
+    return res;
+  }
+
+  function guardarStockTallas(productoId, stockTallasObj) {
+    var prod = consultar('productos', function (p) { return p.id === Number(productoId); })[0];
+    if (!prod) return null;
+
+    var totalSuma = 0;
+    for (var k in stockTallasObj) {
+      if (stockTallasObj.hasOwnProperty(k)) {
+        var cant = Math.max(0, parseInt(stockTallasObj[k], 10) || 0);
+        stockTallasObj[k] = cant;
+        totalSuma += cant;
+      }
+    }
+
+    prod.stock_tallas = stockTallasObj;
+    prod.stock = totalSuma;
+
+    actualizar('productos', function (p) { return p.id === prod.id; }, {
+      stock_tallas: stockTallasObj,
+      stock: totalSuma
+    });
+
+    return { stock_tallas: stockTallasObj, stock: totalSuma };
+  }
+
+  function actualizarStockTalla(productoId, talla, delta) {
+    var prod = consultar('productos', function (p) { return p.id === Number(productoId); })[0];
+    if (!prod) return null;
+
+    var st = obtenerStockTallas(prod);
+    var tallaKey = null;
+
+    // Búsqueda exacta o normalizada de la talla
+    if (st.hasOwnProperty(talla)) {
+      tallaKey = talla;
+    } else {
+      var tallaNorm = String(talla).trim().toLowerCase().replace(/^talla\s*/i, '');
+      for (var k in st) {
+        if (st.hasOwnProperty(k)) {
+          var kNorm = String(k).trim().toLowerCase().replace(/^talla\s*/i, '');
+          if (kNorm === tallaNorm) {
+            tallaKey = k;
+            break;
+          }
+        }
+      }
+    }
+
+    if (!tallaKey) {
+      // Si la talla no existía en el diccionario, usar la primera o registrarla
+      var keys = Object.keys(st);
+      tallaKey = keys.length ? keys[0] : (talla || 'Estándar');
+    }
+
+    var actualCant = Number(st[tallaKey]) || 0;
+    var nuevaCant = Math.max(0, actualCant + Number(delta));
+    st[tallaKey] = nuevaCant;
+
+    // Recalcular stock total sumando cada talla
+    var totalSuma = 0;
+    for (var tk in st) {
+      if (st.hasOwnProperty(tk)) totalSuma += Number(st[tk]) || 0;
+    }
+
+    prod.stock_tallas = st;
+    prod.stock = totalSuma;
+
+    actualizar('productos', function (p) { return p.id === prod.id; }, {
+      stock_tallas: st,
+      stock: totalSuma
+    });
+
+    return { producto: prod, talla: tallaKey, stock_talla: nuevaCant, stock_total: totalSuma };
   }
 
   // Consulta JOIN relacional para reconstruir pedidos con productos
@@ -449,11 +592,79 @@ var MotorSQL = (function () {
         if (resp && resp.ok) {
           var datos = await resp.json();
           if (datos && datos.disponible && Array.isArray(datos.productos)) {
+            // Recuperar lista de productos eliminados para no reintroducirlos
+            var listaEliminados = [];
+            try {
+              if (typeof localStorage !== 'undefined') {
+                var rawDel = localStorage.getItem('db_inveranoli_productos_eliminados');
+                if (rawDel) listaEliminados = JSON.parse(rawDel) || [];
+              }
+            } catch (e) {}
+
+            var prodsExistentes = obtenerTabla('productos');
+            var prodsFinales = [];
+
+            if (prodsExistentes && prodsExistentes.length > 0) {
+              var mapaExistentes = {};
+              for (var ex = 0; ex < prodsExistentes.length; ex++) {
+                mapaExistentes[prodsExistentes[ex].id] = prodsExistentes[ex];
+              }
+
+              // Fusionar productos del servidor preservando stock, tallas, pausas y ediciones
+              (datos.productos || []).forEach(function (pServ) {
+                if (listaEliminados.indexOf(pServ.id) !== -1) {
+                  return; // Joya eliminada por el administrador, omitir
+                }
+                var pLocal = mapaExistentes[pServ.id];
+                if (pLocal) {
+                  // Conservar inventario y tallas dinámicas
+                  pServ.stock = (typeof pLocal.stock === 'number') ? pLocal.stock : pServ.stock;
+                  if (pLocal.stock_tallas) {
+                    pServ.stock_tallas = pLocal.stock_tallas;
+                  }
+                  if (pLocal.activo !== undefined) {
+                    pServ.activo = pLocal.activo;
+                  }
+                  if (pLocal.recomendado !== undefined) {
+                    pServ.recomendado = pLocal.recomendado;
+                  }
+                  if (pLocal.nombre) pServ.nombre = pLocal.nombre;
+                  if (pLocal.precio !== undefined) pServ.precio = pLocal.precio;
+                  if (pLocal.presentacion) pServ.presentacion = pLocal.presentacion;
+                  if (pLocal.tallas) pServ.tallas = pLocal.tallas;
+                  if (pLocal.descripcion) pServ.descripcion = pLocal.descripcion;
+                  if (pLocal.piedras) pServ.piedras = pLocal.piedras;
+                  if (pLocal.imagenes && pLocal.imagenes.length) pServ.imagenes = pLocal.imagenes;
+                  delete mapaExistentes[pServ.id];
+                }
+                prodsFinales.push(pServ);
+              });
+
+              // Mantener productos creados por el admin que no existen en el servidor
+              for (var idRestante in mapaExistentes) {
+                if (mapaExistentes.hasOwnProperty(idRestante)) {
+                  var pRest = mapaExistentes[idRestante];
+                  if (pRest && listaEliminados.indexOf(pRest.id) === -1) {
+                    prodsFinales.push(pRest);
+                  }
+                }
+              }
+            } else {
+              prodsFinales = (datos.productos || []).filter(function (p) {
+                return listaEliminados.indexOf(p.id) === -1;
+              });
+            }
+
+            // Asegurar que cada joya tenga sus tallas y stock inicializados
+            prodsFinales.forEach(function (prod) {
+              obtenerStockTallas(prod);
+            });
+
             persistirTabla('categorias', datos.categorias || []);
-            persistirTabla('productos', datos.productos || []);
+            persistirTabla('productos', prodsFinales);
             return {
               conectado: true,
-              productos: datos.productos.length,
+              productos: prodsFinales.length,
               categorias: (datos.categorias || []).length,
               url_origen: candidateUrl
             };
@@ -464,21 +675,83 @@ var MotorSQL = (function () {
       }
     }
 
-    // Si ningún servidor respondió, usar contingencia de datos semilla locales (modo offline / file:///)
-    var fallbackProds = (typeof PRODUCTOS_INICIALES !== 'undefined' && Array.isArray(PRODUCTOS_INICIALES)) ? PRODUCTOS_INICIALES : [];
-    var fallbackCats = (typeof CATEGORIAS_INICIALES !== 'undefined' && Array.isArray(CATEGORIAS_INICIALES)) ? CATEGORIAS_INICIALES : [];
-    if (fallbackProds.length > 0) {
-      persistirTabla('categorias', fallbackCats);
-      persistirTabla('productos', fallbackProds);
-    }
+    // Si ningún servidor respondió, la base de datos no está disponible (0 productos, 0 categorías)
+    persistirTabla('categorias', []);
+    persistirTabla('productos', []);
     return {
       conectado: false,
-      modo_local: fallbackProds.length > 0,
-      productos: fallbackProds.length,
-      categorias: fallbackCats.length,
+      productos: 0,
+      categorias: 0,
       error: ultimoError
     };
   }
+
+  // Construye la sentencia SQL y la envía a /api/guardar_sql para persistencia permanente en database/schema.sql
+  function sincronizarSentenciaSQLConServidor(tabla, operacion, registro) {
+    if (typeof window === 'undefined') return;
+
+    var sentencia = '';
+    if (tabla === 'usuarios' && operacion === 'INSERT') {
+      var sal = registro.sal || 'sal_defecto';
+      var hash = registro.password_hash || '';
+      var rol = registro.rol || 'cliente';
+      sentencia = "INSERT OR IGNORE INTO usuarios (id, nombre, apellido, cedula, telefono, email, password_hash, sal, rol) VALUES (" +
+        registro.id + ", '" +
+        (registro.nombre || '').replace(/'/g, "''") + "', '" +
+        (registro.apellido || '').replace(/'/g, "''") + "', '" +
+        (registro.cedula || '') + "', '" +
+        (registro.telefono || '') + "', '" +
+        (registro.email || '').replace(/'/g, "''") + "', '" +
+        hash + "', '" +
+        sal + "', '" +
+        rol + "')";
+    } else if (tabla === 'productos' && operacion === 'INSERT') {
+      var imgsJSON = JSON.stringify(registro.imagenes || ['logo.png']).replace(/'/g, "''");
+      sentencia = "INSERT OR IGNORE INTO productos (id, nombre, presentacion, precio, stock, categoria_id, activo, recomendado, descripcion, tallas, piedras, imagenes) VALUES (" +
+        registro.id + ", '" +
+        (registro.nombre || '').replace(/'/g, "''") + "', '" +
+        (registro.presentacion || '').replace(/'/g, "''") + "', " +
+        (parseFloat(registro.precio) || 0) + ", " +
+        (parseInt(registro.stock, 10) || 0) + ", " +
+        (parseInt(registro.categoria_id, 10) || 1) + ", " +
+        (registro.activo !== false ? 1 : 0) + ", " +
+        (registro.recomendado ? 1 : 0) + ", '" +
+        (registro.descripcion || '').replace(/'/g, "''") + "', '" +
+        (registro.tallas || '').replace(/'/g, "''") + "', '" +
+        (registro.piedras || '').replace(/'/g, "''") + "', '" +
+        imgsJSON + "')";
+    } else if (tabla === 'fabricas' && operacion === 'INSERT') {
+      sentencia = "-- FABRICA REGISTRADA: " + (registro.nombre || '') + " (RIF " + (registro.rif || '') + ")";
+    }
+
+    if (!sentencia) return;
+
+    var endpoints = [
+      'http://localhost:3001/api/guardar_sql',
+      'http://127.0.0.1:3001/api/guardar_sql',
+      'http://localhost:3000/api/guardar_sql',
+      'http://127.0.0.1:3000/api/guardar_sql'
+    ];
+
+    if (window.location && window.location.origin && window.location.origin.indexOf('http') === 0) {
+      endpoints.unshift(window.location.origin + '/api/guardar_sql');
+    }
+
+    // Enviar asíncronamente con fallback
+    (async function () {
+      for (var k = 0; k < endpoints.length; k++) {
+        try {
+          var resp = await fetch(endpoints[k], {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sql: sentencia })
+          });
+          if (resp && resp.ok) break;
+        } catch (e) {}
+      }
+    })();
+  }
+
 
   return {
     insertar: insertar,
@@ -491,6 +764,10 @@ var MotorSQL = (function () {
     vaciarTabla: vaciarTabla,
     vaciarBD: vaciarBD,
     cargarDesdeSQL: cargarDesdeSQL,
-    sincronizarDesdeServidorBD: sincronizarDesdeServidorBD
+    sincronizarDesdeServidorBD: sincronizarDesdeServidorBD,
+    obtenerStockTallas: obtenerStockTallas,
+    guardarStockTallas: guardarStockTallas,
+    actualizarStockTalla: actualizarStockTalla,
+    extraerListaTallas: extraerListaTallas
   };
 })();

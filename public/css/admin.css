@@ -3,6 +3,52 @@
    Diseñado para gestión rápida, responsiva y sin dependencias externas.
    ==================================================================== */
 
+/* Vista Exclusiva de Pantalla Principal para Administrador */
+body.admin-mode-active .amz-header,
+body.admin-mode-active .amz-subnav,
+body.admin-mode-active .categoria-pills-section,
+body.admin-mode-active #categoria-pills-wrap,
+body.admin-mode-active .hero-showcase,
+body.admin-mode-active .amz-showcase-section,
+body.admin-mode-active main,
+body.admin-mode-active footer,
+body.admin-mode-active #cart-drawer,
+body.admin-mode-active #cart-overlay,
+body.admin-mode-active #toggle-cart {
+  display: none !important;
+}
+
+body.admin-mode-active #modal-admin {
+  position: static !important;
+  display: block !important;
+  width: 100% !important;
+  min-height: 100vh !important;
+  height: auto !important;
+  background: var(--bg-body) !important;
+  backdrop-filter: none !important;
+  z-index: 1 !important;
+  padding: 24px 16px 40px !important;
+  overflow-y: visible !important;
+}
+
+[data-theme="dark"] body.admin-mode-active #modal-admin {
+  background: #090e18 !important;
+}
+
+body.admin-mode-active .admin-modal-caja {
+  max-width: 1200px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  max-height: none !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 28px !important;
+}
+
+body.admin-mode-active .modal-cerrar {
+  display: none !important;
+}
+
 .admin-modal-caja {
   max-width: 980px !important;
   width: 95% !important;
@@ -209,6 +255,40 @@
   color: #ef4444;
 }
 
+/* Badges segmentados por talla en inventario admin */
+.stock-tallas-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+  max-width: 260px;
+}
+
+.badge-talla-admin {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.badge-talla-admin.disponible {
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #10b981;
+}
+
+.badge-talla-admin.agotado {
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  opacity: 0.7;
+}
+
 .badge-admin-descuento {
   background: #ef4444;
   color: #fff;
@@ -305,3 +385,188 @@
   font-weight: 700;
   cursor: pointer;
 }
+
+/* ══════════════════════════════════════════════════
+   NUEVO DISEÑO PREMIUM PANEL ADMINISTRADOR
+   ══════════════════════════════════════════════════ */
+.admin-header-limpio {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border-gold);
+  margin-bottom: 18px;
+}
+
+.admin-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-header-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  border: 1.5px solid var(--gold-primary);
+  object-fit: cover;
+  background: #000;
+}
+
+.admin-header-controles {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Dashboard Financiero 4 Columnas */
+.admin-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .admin-dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-dash-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-dash-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+}
+
+.admin-dash-total::before { background: #38bdf8; }
+.admin-dash-ganancia::before { background: #10b981; }
+.admin-dash-gastos::before { background: #ef4444; }
+.admin-dash-pendiente::before { background: #f59e0b; }
+
+.admin-dash-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.admin-dash-val {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--card-text-title);
+  line-height: 1.2;
+}
+
+.admin-dash-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* Pedidos de Entrada (Fábricas) */
+.fabrica-search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.fabrica-search-bar select,
+.fabrica-search-bar input {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 14px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.pedidos-entrada-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.pedido-entrada-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.factura-imprimible {
+  background: #ffffff;
+  color: #1e293b;
+  padding: 24px;
+  border-radius: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+  border: 1px solid #cbd5e1;
+}
+
+.factura-header {
+  border-bottom: 2px solid #0f172a;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.factura-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+}
+
+.factura-tabla th {
+  background: #f1f5f9;
+  color: #0f172a;
+  padding: 8px 10px;
+  border-bottom: 2px solid #cbd5e1;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.factura-tabla td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.85rem;
+}
+

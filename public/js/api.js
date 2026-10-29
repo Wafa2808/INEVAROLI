@@ -51,6 +51,21 @@ var Api = (function () {
       return MEMORY_CACHE[pKey];
     }
 
+    // 1. Para sesion_actual, sessionStorage tiene máxima prioridad para aislar la sesión por ventana
+    // y evitar que al refrescar cargue el último usuario ingresado en otra ventana o pestaña
+    if (key === 'sesion_actual' || pKey === prefixedKey('sesion_actual')) {
+      try {
+        if (typeof sessionStorage !== 'undefined') {
+          var rawSession = sessionStorage.getItem(pKey);
+          if (rawSession !== null) {
+            var parsedSession = JSON.parse(rawSession);
+            MEMORY_CACHE[pKey] = parsedSession;
+            return parsedSession;
+          }
+        }
+      } catch (e) {}
+    }
+
     // 2. Verificar localStorage
     try {
       if (typeof localStorage !== 'undefined') {
@@ -63,7 +78,7 @@ var Api = (function () {
       }
     } catch (e) {}
 
-    // 3. Verificar sessionStorage
+    // 3. Verificar sessionStorage para el resto de claves
     try {
       if (typeof sessionStorage !== 'undefined') {
         var rawSession = sessionStorage.getItem(pKey);

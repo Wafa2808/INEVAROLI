@@ -176,6 +176,23 @@ class ManejadorWebUnificado(SimpleHTTPRequestHandler):
         except (IOError, OSError):
             pass
 
+    def do_POST(self):
+        parsed = urlparse(self.path)
+        ruta = parsed.path
+        if ruta == '/api/guardar_sql':
+            try:
+                longitud = int(self.headers.get('Content-Length', 0))
+                cuerpo = self.rfile.read(longitud).decode('utf-8')
+                payload = json.loads(cuerpo)
+                sentencia = payload.get('sql')
+                if sentencia and isinstance(sentencia, (str, unicode) if sys.version_info[0] < 3 else str):
+                    with open(servidor_database.SCHEMA_PATH, 'a', encoding='utf-8' if sys.version_info[0] >= 3 else None) as f:
+                        f.write(u'\n' + sentencia.strip() + u';\n')
+                    return self.responder_json(200, {'exito': True, 'mensaje': 'Sentencia persistida en schema.sql'})
+            except Exception as e:
+                return self.responder_json(400, {'exito': False, 'error': str(e)})
+        self.responder_json(404, {'error': 'Ruta POST no encontrada'})
+
     def do_GET(self):
         parsed = urlparse(self.path)
         ruta = parsed.path
@@ -190,7 +207,12 @@ class ManejadorWebUnificado(SimpleHTTPRequestHandler):
             datos = servidor_database.leer_datos_desde_sql()
             return self.responder_json(200, datos.get('productos', []))
 
-        # 3. API Estado del Servidor
+        # 3. API Tasa Oficial BCV en Vivo desde www.bcv.org.ve
+        if ruta in ('/api/bcv', '/api/tasa', '/bcv'):
+            tasa = servidor_database.consultar_tasa_oficial_bcv()
+            return self.responder_json(200, tasa)
+
+        # 4. API Estado del Servidor
         if ruta in ('/api/estado', '/estado'):
             datos = servidor_database.leer_datos_desde_sql()
             res = {

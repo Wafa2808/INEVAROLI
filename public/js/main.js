@@ -10,49 +10,59 @@ var estado = {
 
 // Inicialización de la aplicación
 document.addEventListener('DOMContentLoaded', async function () {
-  // 0. Inicializar Tema Visual (Modo Claro por defecto o guardado)
+  // 0. CRÍTICO: Configurar Event Listeners PRIMERO (antes de operaciones asíncronas)
+  // Esto garantiza que login, registro, botones y modales respondan de inmediato
+  // sin esperar a que el servidor de BD o la precarga de usuarios terminen.
+  configurarEventos();
+
+  // 1. Inicializar Tema Visual (Modo Claro por defecto o guardado)
   inicializarTemaVisual();
 
-  // 1. Inicializar base de datos
+  // 2. Inicializar base de datos
   MotorSQL.inicializarDatosMaestros(false);
 
-  // 1.1 Consultar al Servidor de Base de Datos (puerto 3001)
+  // 3. Consultar al Servidor de Base de Datos (puerto 3001)
   // Si el servidor está apagado, la tienda abre en 0 productos (100% no local)
-  await intentarSincronizacionServidorBD();
-
-  // 2. Asegurar precarga de cuentas predeterminadas (Admin y Cliente)
-  if (typeof precargarUsuarios === 'function') {
-    await precargarUsuarios();
-  } else if (typeof precargarAdmin === 'function') {
-    await precargarAdmin();
+  try {
+    await intentarSincronizacionServidorBD();
+  } catch (e) {
+    console.error('[INVERANOLI] Error al sincronizar con servidor BD:', e);
   }
 
-  // 3. Inicializar Tasa BCV
+  // 4. Asegurar precarga de cuentas predeterminadas (Admin y Cliente)
+  try {
+    if (typeof precargarUsuarios === 'function') {
+      await precargarUsuarios();
+    } else if (typeof precargarAdmin === 'function') {
+      await precargarAdmin();
+    }
+  } catch (e) {
+    console.error('[INVERANOLI] Error al precargar usuarios:', e);
+  }
+
+  // 5. Inicializar Tasa BCV
   if (typeof TasaBCV !== 'undefined') {
     TasaBCV.actualizarWidget();
   }
 
-  // 4. Actualizar estado de usuario y sesión
+  // 6. Actualizar estado de usuario y sesión (conservando el usuario activo sin sobreescribir)
   if (typeof actualizarInterfazUsuario === 'function') {
     actualizarInterfazUsuario();
   }
 
-  // 5. Cargar Categorías en UI
+  // 7. Cargar Categorías en UI
   actualizarCategoriasUI();
 
-  // 6. Renderizar Catálogo, Ofertas y Recomendados
+  // 8. Renderizar Catálogo, Ofertas y Recomendados
   renderProductos();
   renderCarruselesSecundarios();
 
-  // 7. Inicializar Hero Slider
+  // 9. Inicializar Hero Slider
   if (typeof CarruselInicio !== 'undefined') {
     CarruselInicio.initHero();
   }
 
-  // 8. Configurar Event Listeners
-  configurarEventos();
-
-  // 9. Sincronizar datos de la tienda en el pie de página
+  // 10. Sincronizar datos de la tienda en el pie de página
   var elRif = document.getElementById('footer-rif');
   if (elRif && typeof INVERANOLI_CONFIG !== 'undefined' && INVERANOLI_CONFIG.rif) {
     elRif.textContent = INVERANOLI_CONFIG.rif;
@@ -64,7 +74,7 @@ function inicializarTemaVisual() {
   var temaGuardado = 'light';
   try {
     temaGuardado = localStorage.getItem('inveranoli_tema') || 'light';
-  } catch (e) {}
+  } catch (e) { }
 
   aplicarTemaVisual(temaGuardado);
 }
@@ -75,7 +85,7 @@ function alternarTemaVisual() {
   aplicarTemaVisual(nuevo);
   try {
     localStorage.setItem('inveranoli_tema', nuevo);
-  } catch (e) {}
+  } catch (e) { }
 }
 
 function aplicarTemaVisual(tema) {
@@ -95,23 +105,21 @@ async function intentarSincronizacionServidorBD() {
   if (typeof MotorSQL === 'undefined') return;
 
   var res = await MotorSQL.sincronizarDesdeServidorBD();
-  
+
   // Actualizar indicador visual de base de datos en pantalla si existe
   var statusWidget = document.getElementById('estado-servidor-db-badge');
   if (statusWidget) {
-    if (res.conectado) {
+    if (res.conectado && res.productos > 0) {
       statusWidget.className = 'servidor-badge conectado';
       statusWidget.style.background = '';
       statusWidget.style.color = '';
-      statusWidget.innerHTML = '● Servidor BD Conectado (' + res.productos + ' joyas)';
-    } else if (res.modo_local || res.productos > 0) {
-      statusWidget.className = 'servidor-badge local';
-      statusWidget.style.background = 'rgba(37, 99, 235, 0.2)';
-      statusWidget.style.color = '#38bdf8';
-      statusWidget.style.border = '1px solid #38bdf8';
-      statusWidget.innerHTML = '● Base de Datos Local (' + res.productos + ' joyas)';
+      statusWidget.style.border = '';
+      statusWidget.innerHTML = '● Base de Datos Conectada (' + res.productos + ' joyas)';
     } else {
       statusWidget.className = 'servidor-badge desconectado';
+      statusWidget.style.background = '';
+      statusWidget.style.color = '';
+      statusWidget.style.border = '';
       statusWidget.innerHTML = '○ Servidor BD Desconectado (0 joyas)';
     }
   }
@@ -183,21 +191,9 @@ function configurarEventos() {
     btnAdmin.addEventListener('click', abrirAdminModal);
   }
 
-  // Formulario Login
-  var fLogin = document.getElementById('form-login');
-  if (fLogin) fLogin.addEventListener('submit', procesarLogin);
-
-  // Formulario Registro
-  var fReg = document.getElementById('form-registro');
-  if (fReg) fReg.addEventListener('submit', procesarRegistro);
-
-  // Formulario Recuperar
-  var fRec = document.getElementById('form-recuperar');
-  if (fRec) fRec.addEventListener('submit', procesarRecuperacion);
-
-  // Formulario Perfil
-  var fPerfil = document.getElementById('form-perfil');
-  if (fPerfil) fPerfil.addEventListener('submit', guardarCambiosPerfil);
+  // Los formularios Login, Registro, Recuperar y Perfil usan onsubmit inline en el HTML
+  // para garantizar que funcionen incluso antes de que DOMContentLoaded termine.
+  // No se agregan listeners duplicados aquí.
 
   // Formulario Admin Producto
   var fAdminProd = document.getElementById('form-producto-admin');
@@ -389,15 +385,16 @@ function generarTarjetaProductoHTML(p) {
   var precioBs = typeof TasaBCV !== 'undefined' ? TasaBCV.convertirBs(precioFinal) : '';
   var esFav = typeof Favoritos !== 'undefined' ? Favoritos.esFavorito(p.id) : false;
 
-  var foto = (p.imagenes && p.imagenes.length) ? p.imagenes[0] : 'images/anillo_grado.jpg';
+  var foto = (p.imagenes && p.imagenes.length) ? p.imagenes[0] : 'logo.png';
 
   // Badges superiores (Destacado exclusivo)
   var badgesHTML = '';
-  if (p.recomendado) {
+  var esDestacado = (p.recomendado === 1 || p.recomendado === true || p.recomendado === '1');
+  if (esDestacado) {
     badgesHTML += '<span class="badge-destacado">DESTACADO</span>';
   }
 
-  // Stock badge
+  // Stock badge general
   var stockHTML = '';
   if (p.stock <= 0) {
     stockHTML = '<span class="badge-stock badge-stock-agotado">Agotado</span>';
@@ -439,7 +436,7 @@ function generarTarjetaProductoHTML(p) {
 // ─── Renderizado de Carruseles de Ofertas y Recomendados ───
 function renderCarruselesSecundarios() {
   var trackDesc = document.getElementById('carrusel-descuentos-track');
-  var trackRec  = document.getElementById('carrusel-recomendados-track');
+  var trackRec = document.getElementById('carrusel-recomendados-track');
 
   var todos = MotorSQL.consultar('productos', function (p) { return p.activo !== false; });
 
@@ -453,13 +450,61 @@ function renderCarruselesSecundarios() {
     trackDesc.innerHTML = htmlDesc || '<p style="padding:20px; color:#64748b;">No hay promociones activas actualmente.</p>';
   }
 
-  // Recomendados (recomendado = true)
+  // Recomendados (recomendado = 1 / true)
   if (trackRec) {
-    var recomendados = todos.filter(function (p) { return !!p.recomendado; });
+    var recomendados = todos.filter(function (p) {
+      return (p.recomendado === 1 || p.recomendado === true || p.recomendado === '1');
+    });
     var htmlRec = '';
     recomendados.forEach(function (p) {
       htmlRec += generarTarjetaProductoHTML(p);
     });
     trackRec.innerHTML = htmlRec || '<p style="padding:20px; color:#64748b;">No hay joyas destacadas en este momento.</p>';
   }
+
+  // Tarjetas verticales de Colecciones Destacadas
+  renderShowcaseCards(todos);
 }
+
+// Actualiza las imágenes de las tarjetas de colecciones con las fotos de la base de datos
+function renderShowcaseCards(todos) {
+  if (!todos || !todos.length) return;
+
+  function obtenerFoto(prod) {
+    if (!prod) return 'logo.png';
+    if (Array.isArray(prod.imagenes) && prod.imagenes.length) return prod.imagenes[0];
+    if (typeof prod.imagenes === 'string' && prod.imagenes.indexOf('data:image') === 0) return prod.imagenes;
+    return 'logo.png';
+  }
+
+  var imgGrado = document.getElementById('showcase-img-grado');
+  if (imgGrado) {
+    var p1 = todos.find(function (p) { return p.id === 1; });
+    imgGrado.src = obtenerFoto(p1);
+  }
+
+  var imgBodas = document.getElementById('showcase-img-bodas');
+  if (imgBodas) {
+    var p13 = todos.find(function (p) { return p.id === 13; });
+    imgBodas.src = obtenerFoto(p13);
+  }
+
+  var imgComp = document.getElementById('showcase-img-compromiso');
+  if (imgComp) {
+    var p9 = todos.find(function (p) { return p.id === 9; });
+    imgComp.src = obtenerFoto(p9);
+  }
+
+  var imgAcero = document.getElementById('showcase-img-acero');
+  if (imgAcero) {
+    var p16 = todos.find(function (p) { return p.id === 16; });
+    imgAcero.src = obtenerFoto(p16);
+  }
+
+  var imgAretes = document.getElementById('showcase-img-aretes');
+  if (imgAretes) {
+    var p20 = todos.find(function (p) { return p.id === 20; });
+    imgAretes.src = obtenerFoto(p20);
+  }
+}
+

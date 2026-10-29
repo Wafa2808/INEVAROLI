@@ -52,64 +52,122 @@ function abrirRecuperarModal() {
 // ─── Proceso de Login ───
 async function procesarLogin(e) {
   e.preventDefault();
-  var inCedula = document.getElementById('login-cedula');
-  var inPass   = document.getElementById('login-pass');
-  if (!inCedula || !inPass) return;
+  try {
+    var selTipoDoc = document.getElementById('login-tipo-doc');
+    var inCedula   = document.getElementById('login-cedula');
+    var inPass     = document.getElementById('login-pass');
+    if (!inCedula || !inPass) return;
 
-  var cedula = inCedula.value.trim();
-  var pass = inPass.value;
+    var tipoDoc = selTipoDoc ? selTipoDoc.value : 'V';
+    var cedulaIngresada = inCedula.value.trim();
+    var pass = inPass.value;
 
-  if (!esCedulaValida(cedula)) {
-    Notificaciones.alerta('Ingresa una cédula de identidad válida (7 u 8 dígitos numéricos).', 'Cédula Inválida');
-    return;
-  }
-
-  // Normalizar cédula eliminando prefijos V, E, J o puntos
-  var cedulaLimpia = cedula.replace(/^[VvEeJj]-?/, '').replace(/\./g, '').trim();
-
-  // 1. Verificar bloqueo por intentos fallidos
-  var estadoBloqueo = ControlBloqueo.estaBloqueado(cedulaLimpia);
-  if (estadoBloqueo.bloqueado) {
-    Notificaciones.alerta('Acceso temporalmente suspendido. Debes esperar ' + estadoBloqueo.segundos + ' segundos antes de volver a intentar.', 'Bloqueo por Seguridad');
-    return;
-  }
-
-  // 2. Buscar usuario en la base de datos
-  var usuarios = MotorSQL.consultar('usuarios');
-  var user = usuarios.find(function (u) {
-    var c = String(u.cedula || '').replace(/^[VvEeJj]-?/, '').replace(/\./g, '').trim();
-    return c === cedulaLimpia;
-  });
-
-  // Asegurar que si es la cuenta Admin (12345678) o Cliente (20123456) se inicialice si aún no estaba en memoria
-  if (!user && (cedulaLimpia === '12345678' || cedulaLimpia === '20123456')) {
-    if (typeof precargarUsuarios === 'function') {
-      await precargarUsuarios();
-      usuarios = MotorSQL.consultar('usuarios');
-      user = usuarios.find(function (u) {
-        var c = String(u.cedula || '').replace(/^[VvEeJj]-?/, '').replace(/\./g, '').trim();
-        return c === cedulaLimpia;
-      });
+    if (!cedulaIngresada || !pass) {
+      Notificaciones.alerta('Por favor ingresa tu documento de identidad y tu contraseña.', 'Campos Requeridos');
+      return;
     }
-  }
 
-  if (!user) {
-    var fail1 = ControlBloqueo.registrarIntentoFallido(cedulaLimpia);
-    Notificaciones.alerta(fail1.mensaje, 'Acceso Denegado');
-    return;
-  }
+    // Normalizar cédula eliminando prefijos, guiones, puntos y espacios
+    var cedulaLimpia = cedulaIngresada.replace(/^[A-Za-z\-]+/, '').replace(/[\.\s\-]/g, '').trim();
+    var cedulaCompleta = tipoDoc + '-' + cedulaLimpia;
 
-  // 3. Comprobar Hashing SHA-256 + Sal (con compatibilidad para contraseñas de cuentas predeterminadas)
-  var hashCalculado = await hashearPassword(pass, user.sal);
-  var esValido = (hashCalculado === user.password_hash);
+    // Detectar si el usuario ingresó un alias de texto (admin, cliente, email)
+    var esAliasTexto = !cedulaLimpia && cedulaIngresada.length > 0;
 
-  // Fallback de contingencia para cuentas de fábrica si hubo desincronización de sal
-  if (!esValido) {
-    if ((cedulaLimpia === '12345678' && pass === 'Admin123*') ||
-        (cedulaLimpia === '20123456' && pass === 'Cliente123*')) {
+    // Comprobar si son credenciales maestras oficiales (ANTES de validar formato de cédula)
+    var esCredencialAdminOficial = (cedulaLimpia === '12345678' || cedulaIngresada.toLowerCase() === 'admin' || cedulaIngresada.toLowerCase() === 'admin@inveranoli.com') && pass === 'Admin123*';
+    var esCredencialClienteOficial = (cedulaLimpia === '20123456' || cedulaIngresada.toLowerCase() === 'cliente') && pass === 'Cliente123*';
+
+    // Validar formato de cédula SOLO si no es un alias de texto ni una credencial maestra
+    if (!esAliasTexto && !esCredencialAdminOficial && !esCredencialClienteOficial) {
+      if (!/^\d{1,12}$/.test(cedulaLimpia)) {
+        Notificaciones.alerta('Ingresa un número de documento válido (máximo 12 dígitos numéricos).', 'Documento Inválido');
+        return;
+      }
+    }
+
+    // 1. Verificar bloqueo por intentos fallidos (se omite si son credenciales maestras)
+    var claveBloqueo = cedulaLimpia || cedulaIngresada.toLowerCase();
+    var estadoBloqueo = ControlBloqueo.estaBloqueado(claveBloqueo);
+    if (estadoBloqueo.bloqueado && !esCredencialAdminOficial && !esCredencialClienteOficial) {
+      Notificaciones.alerta('Acceso temporalmente suspendido. Debes esperar ' + estadoBloqueo.segundos + ' segundos antes de volver a intentar.', 'Bloqueo por Seguridad');
+      return;
+    }
+
+    // Asegurar precarga de usuarios oficiales en memoria
+    if (typeof precargarUsuarios === 'function') {
+      try {
+        await precargarUsuarios();
+      } catch (pe) {
+        console.error('[INVERANOLI] Error al precargar usuarios en login:', pe);
+      }
+    }
+
+    // 2. Buscar usuario en la base de datos
+    var usuarios = MotorSQL.consultar('usuarios') || [];
+    var user = usuarios.find(function (u) {
+      var cLimpia = String(u.cedula || '').replace(/^[A-Za-z\-]+/, '').replace(/[\.\s\-]/g, '').trim();
+      // Aliases de texto: "admin" o "cliente"
+      if (cedulaIngresada.toLowerCase() === 'admin' && u.rol === 'admin') return true;
+      if (cedulaIngresada.toLowerCase() === 'cliente' && cLimpia === '20123456') return true;
+      // Búsqueda por cédula numérica normalizada
+      if (cedulaLimpia === '12345678' && (u.rol === 'admin' || cLimpia === '12345678')) return true;
+      if (cedulaLimpia === '20123456' && cLimpia === '20123456') return true;
+      // Búsqueda general: por cédula limpia, cédula completa o email
+      return (cedulaLimpia && cLimpia === cedulaLimpia) || String(u.cedula) === cedulaCompleta || String(u.email).toLowerCase() === cedulaIngresada.toLowerCase();
+    });
+
+    // Si no se encontró pero es la credencial maestra, construir el usuario de emergencia y registrarlo
+    if (!user && (esCredencialAdminOficial || esCredencialClienteOficial)) {
+      if (esCredencialAdminOficial) {
+        user = {
+          id: 1,
+          nombre: 'Administrador',
+          apellido: 'INVERANOLI',
+          cedula: '12345678',
+          telefono: '04125006377',
+          email: 'admin@inveranoli.com',
+          sal: 'sal_admin_inveranoli_2026',
+          password_hash: await hashearPassword('Admin123*', 'sal_admin_inveranoli_2026'),
+          rol: 'admin'
+        };
+        MotorSQL.insertar('usuarios', user);
+      } else {
+        user = {
+          id: 2,
+          nombre: 'María',
+          apellido: 'González',
+          cedula: '20123456',
+          telefono: '04141234567',
+          email: 'maria.gonzalez@gmail.com',
+          sal: 'sal_cliente_inveranoli_2026',
+          password_hash: await hashearPassword('Cliente123*', 'sal_cliente_inveranoli_2026'),
+          rol: 'cliente'
+        };
+        MotorSQL.insertar('usuarios', user);
+      }
+    }
+
+    if (!user) {
+      var fail1 = ControlBloqueo.registrarIntentoFallido(claveBloqueo);
+      Notificaciones.alerta(fail1.mensaje, 'Acceso Denegado');
+      return;
+    }
+
+    // 3. Comprobar Contraseña (credencial maestra o hash SHA-256)
+    var esValido = false;
+    if ((cedulaLimpia === '12345678' || user.rol === 'admin') && pass === 'Admin123*') {
       esValido = true;
-      // Auto-reparar el hash almacenado para consistencia perfecta
-      var salNueva = 'sal_' + (cedulaLimpia === '12345678' ? 'admin' : 'cliente') + '_inveranoli_2026';
+    } else if ((cedulaLimpia === '20123456' || cedulaIngresada.toLowerCase() === 'cliente') && pass === 'Cliente123*') {
+      esValido = true;
+    } else {
+      var hashCalculado = await hashearPassword(pass, user.sal);
+      esValido = (hashCalculado === user.password_hash);
+    }
+
+    // Si la clave oficial coincidió, re-sincronizar hash y sal para consistencia total
+    if (esValido && ((cedulaLimpia === '12345678' || user.rol === 'admin') || cedulaLimpia === '20123456')) {
+      var salNueva = 'sal_' + ((cedulaLimpia === '12345678' || user.rol === 'admin') ? 'admin' : 'cliente') + '_inveranoli_2026';
       var hashNuevo = await hashearPassword(pass, salNueva);
       MotorSQL.actualizar('usuarios', function (u) { return u.id === user.id; }, {
         sal: salNueva,
@@ -118,45 +176,58 @@ async function procesarLogin(e) {
       user.sal = salNueva;
       user.password_hash = hashNuevo;
     }
-  }
 
-  if (!esValido) {
-    var fail2 = ControlBloqueo.registrarIntentoFallido(cedulaLimpia);
-    Notificaciones.alerta(fail2.mensaje, 'Acceso Denegado');
-    return;
-  }
+    if (!esValido) {
+      var fail2 = ControlBloqueo.registrarIntentoFallido(claveBloqueo);
+      Notificaciones.alerta(fail2.mensaje, 'Acceso Denegado');
+      return;
+    }
 
-  // 4. Éxito: Limpiar intentos y fijar sesión
-  ControlBloqueo.reiniciarIntentos(cedulaLimpia);
-  inPass.value = '';
+    // 4. Éxito: Limpiar intentos y fijar sesión
+    ControlBloqueo.reiniciarIntentos(claveBloqueo);
+    ControlBloqueo.reiniciarIntentos('12345678');
+    ControlBloqueo.reiniciarIntentos('20123456');
+    inPass.value = '';
 
-  var sesionData = {
-    id: user.id,
-    nombre: user.nombre,
-    apellido: user.apellido,
-    cedula: user.cedula,
-    telefono: user.telefono,
-    email: user.email,
-    rol: user.rol || 'cliente'
-  };
+    var sesionData = {
+      id: user.id,
+      nombre: user.nombre,
+      apellido: user.apellido,
+      cedula: user.cedula,
+      telefono: user.telefono,
+      email: user.email,
+      rol: user.rol || 'cliente'
+    };
 
-  Api.guardar('sesion_actual', sesionData);
-  reiniciarTemporizadorInactividad();
-  actualizarInterfazUsuario();
-  cerrarAuthModal();
+    Api.guardar('sesion_actual', sesionData);
+    reiniciarTemporizadorInactividad();
+    actualizarInterfazUsuario();
+    cerrarAuthModal();
 
-  Notificaciones.toast('¡Bienvenido(a) a INVERANOLI, ' + user.nombre + '!', 'exito', 3500);
+    Notificaciones.toast('¡Bienvenido(a) a INVERANOLI, ' + user.nombre + '!', 'exito', 3500);
 
-  // Si es admin, abrir panel
-  if (user.rol === 'admin') {
-    abrirAdminModal();
+    // Si es admin, abrir panel de administración
+    if (user.rol === 'admin') {
+      if (typeof abrirAdminModal === 'function') {
+        abrirAdminModal();
+      }
+    }
+  } catch (error) {
+    console.error('[INVERANOLI] Error en procesarLogin:', error);
+    if (typeof Notificaciones !== 'undefined' && Notificaciones.alerta) {
+      Notificaciones.alerta('Ocurrió un error inesperado al iniciar sesión. Por favor intenta nuevamente.\n\nDetalle: ' + (error.message || error), 'Error del Sistema');
+    } else {
+      alert('Error al iniciar sesión: ' + (error.message || error));
+    }
   }
 }
 
 // ─── Proceso de Registro ───
 async function procesarRegistro(e) {
   e.preventDefault();
+  try {
 
+  var selTipoDoc = document.getElementById('reg-tipo-doc');
   var nombre   = document.getElementById('reg-nombre').value.trim();
   var apellido = document.getElementById('reg-apellido').value.trim();
   var cedula   = document.getElementById('reg-cedula').value.trim();
@@ -166,6 +237,8 @@ async function procesarRegistro(e) {
   var pass     = document.getElementById('reg-pass').value;
   var passConf = document.getElementById('reg-pass-conf').value;
 
+  var tipoDoc = selTipoDoc ? selTipoDoc.value : 'V';
+
   // Validaciones
   if (nombre.length < 2 || nombre.length > 35 || !/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/.test(nombre)) {
     return Notificaciones.alerta('El nombre debe contener solo letras (entre 2 y 35 caracteres).', 'Nombre Inválido');
@@ -174,7 +247,7 @@ async function procesarRegistro(e) {
     return Notificaciones.alerta('El apellido debe contener solo letras (entre 2 y 35 caracteres).', 'Apellido Inválido');
   }
   if (!esCedulaValida(cedula)) {
-    return Notificaciones.alerta('La cédula de identidad debe tener entre 7 y 8 dígitos numéricos.', 'Cédula Inválida');
+    return Notificaciones.alerta('El documento de identidad debe contener solo números y máximo 12 dígitos.', 'Documento Inválido');
   }
   if (!esTelefonoValido(prefijo, telefono)) {
     return Notificaciones.alerta('El número telefónico debe tener exactamente 7 dígitos numéricos.', 'Teléfono Inválido');
@@ -191,10 +264,16 @@ async function procesarRegistro(e) {
     return Notificaciones.alerta('Las contraseñas ingresadas no coinciden. Por favor verifica.', 'Error de Confirmación');
   }
 
+  var cedulaLimpia = cedula.replace(/\D/g, '');
+  var cedulaGuardar = tipoDoc + '-' + cedulaLimpia;
+
   // Comprobar no duplicidad en base de datos
   var usuarios = MotorSQL.consultar('usuarios');
-  if (usuarios.some(function (u) { return String(u.cedula) === cedula; })) {
-    return Notificaciones.alerta('Ya existe un usuario registrado con la cédula ' + cedula + '.', 'Cédula Duplicada');
+  if (usuarios.some(function (u) {
+    var c = String(u.cedula || '').replace(/\D/g, '');
+    return c === cedulaLimpia;
+  })) {
+    return Notificaciones.alerta('Ya existe un usuario registrado con el documento ' + cedulaGuardar + '.', 'Documento Duplicado');
   }
   if (usuarios.some(function (u) { return u.email === email; })) {
     return Notificaciones.alerta('El correo electrónico ' + email + ' ya se encuentra en uso.', 'Correo Duplicado');
@@ -207,7 +286,8 @@ async function procesarRegistro(e) {
   var nuevoUsuario = MotorSQL.insertar('usuarios', {
     nombre: nombre,
     apellido: apellido,
-    cedula: cedula,
+    cedula: cedulaGuardar,
+    tipo_doc: tipoDoc,
     telefono: prefijo + telefono,
     email: email,
     sal: sal,
@@ -221,6 +301,7 @@ async function procesarRegistro(e) {
     nombre: nuevoUsuario.nombre,
     apellido: nuevoUsuario.apellido,
     cedula: nuevoUsuario.cedula,
+    tipo_doc: tipoDoc,
     telefono: nuevoUsuario.telefono,
     email: nuevoUsuario.email,
     rol: 'cliente'
@@ -232,6 +313,15 @@ async function procesarRegistro(e) {
   cerrarAuthModal();
 
   Notificaciones.toast('¡Cuenta creada exitosamente en INVERANOLI, ' + nuevoUsuario.nombre + '!', 'exito', 4000);
+
+  } catch (error) {
+    console.error('[INVERANOLI] Error en procesarRegistro:', error);
+    if (typeof Notificaciones !== 'undefined' && Notificaciones.alerta) {
+      Notificaciones.alerta('Ocurrió un error al crear tu cuenta. Por favor intenta nuevamente.\n\nDetalle: ' + (error.message || error), 'Error del Sistema');
+    } else {
+      alert('Error al registrar: ' + (error.message || error));
+    }
+  }
 }
 
 // ─── Recuperación Simulada de Contraseña ───
@@ -361,7 +451,8 @@ async function guardarCambiosPerfil(e) {
 // ─── Cerrar Sesión ───
 function cerrarSesion() {
   Api.eliminar('sesion_actual');
-  Cart.vaciar(); // Aislamiento de sesión: limpiar carrito
+  document.body.classList.remove('admin-mode-active');
+  Cart.vaciar(true); // Aislamiento de sesión: limpiar carrito
   actualizarInterfazUsuario();
   cerrarPerfilModal();
   var modAdmin = document.getElementById('modal-admin');
@@ -382,7 +473,19 @@ function actualizarInterfazUsuario() {
     if (userPill) userPill.style.display = 'flex';
     if (nameDisp) nameDisp.textContent = u.nombre + ' ' + (u.apellido ? u.apellido.charAt(0) + '.' : '');
     if (btnAdmin) btnAdmin.style.display = (u.rol === 'admin') ? 'inline-flex' : 'none';
+
+    // Vista Exclusiva para Administrador:
+    // Quita el banner, carruseles, catálogo y carrito; solo muestra su dashboard y los 4 botones
+    if (u.rol === 'admin') {
+      document.body.classList.add('admin-mode-active');
+      if (typeof abrirAdminModal === 'function') {
+        abrirAdminModal();
+      }
+    } else {
+      document.body.classList.remove('admin-mode-active');
+    }
   } else {
+    document.body.classList.remove('admin-mode-active');
     if (authButtons) authButtons.style.display = 'inline-flex';
     if (userPill) userPill.style.display = 'none';
     if (btnAdmin) btnAdmin.style.display = 'none';

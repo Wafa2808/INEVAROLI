@@ -342,10 +342,10 @@ var Checkout = (function () {
       total: datosOrden.totalUSD,
       metodo_pago: datosOrden.metodoPago,
       despacho: datosOrden.agenciaEnvio,
-      estado: 'recibido'
+      estado: 'pendiente'
     });
 
-    // 3. Guardar Detalle de la Orden (El stock se mantiene hasta que pase a "En Taller / Ajuste")
+    // 3. Guardar Detalle de la Orden
     items.forEach(function (it) {
       MotorSQL.insertar('detalle_ordenes', {
         orden_id: ordenId,
@@ -359,6 +359,8 @@ var Checkout = (function () {
     // 4. Sincronizar catálogo
     if (typeof renderProductos === 'function') renderProductos();
     if (typeof renderAdminTabla === 'function') renderAdminTabla();
+    if (typeof renderAdminPedidosTabla === 'function') renderAdminPedidosTabla();
+    if (typeof actualizarDashboardFinanciero === 'function') actualizarDashboardFinanciero();
 
     // 5. Construir Mensaje de WhatsApp Altamente Intuitivo y Profesional
     var metodoTexto = datosOrden.metodoPago === 'pago_movil' ? 'Pago Móvil (Tasa Oficial BCV)' : (datosOrden.metodoPago === 'transferencia' ? 'Transferencia Bancaria Nacional' : 'Efectivo en Tienda ($ USD / Bs)');
@@ -391,7 +393,7 @@ var Checkout = (function () {
       if (it.presentacion) waTexto += '   ▫ *Material:* ' + it.presentacion + '\n';
       waTexto += '   ▫ *Cantidad:* ' + it.cantidad + ' unidad(es) × $' + it.precio.toFixed(2) + '\n';
       if (it.personalizacion) {
-        waTexto += '   ▫ ✍️ *Grabado Láser / Talla:* "' + it.personalizacion + '"\n';
+        waTexto += '   ▫ ✍️ *Talla Seleccionada:* "' + it.personalizacion + '"\n';
       }
       waTexto += '   ▫ *Subtotal:* $' + (it.precio * it.cantidad).toFixed(2) + '\n';
     });
@@ -408,14 +410,16 @@ var Checkout = (function () {
     var waNum = INVERANOLI_CONFIG.whatsapp || '584125006377';
     var urlWA = 'https://wa.me/' + waNum + '?text=' + encodeURIComponent(waTexto);
 
-    // 6. Vaciar carrito
-    Cart.vaciar();
+    // 6. El pedido se conserva en el carrito y queda protegido hasta que el administrador valide el pago
     cerrarModal();
+    if (typeof Cart !== 'undefined') {
+      Cart.actualizarBadges();
+    }
 
     // 7. Abrir WhatsApp
     window.open(urlWA, '_blank');
     if (typeof Notificaciones !== 'undefined') {
-      Notificaciones.alerta('¡Pedido #' + ordenId + ' registrado exitosamente en el sistema de INVERANOLI! Tu mensaje estructurado ha sido generado para WhatsApp.', '¡Pedido Confirmado!');
+      Notificaciones.alerta('¡Pedido #' + ordenId + ' registrado exitosamente en el sistema de INVERANOLI! Tu pedido quedará registrado en tu carrito hasta que el administrador valide tu comprobante de pago.', '¡Pedido Confirmado!');
     } else {
       alert('¡Pedido #' + ordenId + ' registrado exitosamente en el sistema de INVERANOLI!');
     }

@@ -1,9 +1,98 @@
 const http = require('http');
+const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
 const PORT = 3001;
 const SCHEMA_PATH = path.join(__dirname, 'database', 'schema.sql');
+
+// ─── Cache en memoria de Tasa Oficial BCV (https://www.bcv.org.ve/) ───
+let cacheTasaBCV = {
+  monto: null,
+  monto_formateado: null,
+  fecha: null,
+  fuente: 'Banco Central de Venezuela (https://www.bcv.org.ve/)',
+  timestamp: null,
+  actualizado_hace_ms: null
+};
+let peticionEnCursoBCV = null;
+
+function consultarTasaOficialBCV() {
+  const ahora = Date.now();
+  // Cache por 15 minutos (900.000 ms)
+  if (cacheTasaBCV.monto && (ahora - cacheTasaBCV.timestamp < 15 * 60 * 1000)) {
+    return Promise.resolve(cacheTasaBCV);
+  }
+
+  if (peticionEnCursoBCV) {
+    return peticionEnCursoBCV;
+  }
+
+  peticionEnCursoBCV = new Promise((resolve) => {
+    const options = {
+      hostname: 'www.bcv.org.ve',
+      port: 443,
+      path: '/',
+      method: 'GET',
+      rejectUnauthorized: false,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8'
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const matchDolar = data.match(/id=["']dolar["'][\s\S]*?<strong[^>]*>\s*([0-9.,]+)\s*<\/strong>/i);
+          let matchFecha = data.match(/Fecha Valor:\s*<span[^>]*>\s*([^<]+)\s*<\/span>/i);
+          let fechaTexto = matchFecha ? matchFecha[1].trim().replace(/\s+/g, ' ') : new Date().toLocaleDateString('es-VE');
+
+          if (matchDolar) {
+            const raw = matchDolar[1].trim();
+            const num = parseFloat(raw.replace(/\./g, '').replace(',', '.'));
+            if (!isNaN(num) && num > 0) {
+              cacheTasaBCV = {
+                monto: num,
+                monto_formateado: raw,
+                fecha: fechaTexto,
+                fuente: 'Banco Central de Venezuela (https://www.bcv.org.ve/)',
+                timestamp: Date.now(),
+                oficial: true
+              };
+              peticionEnCursoBCV = null;
+              return resolve(cacheTasaBCV);
+            }
+          }
+        } catch (e) {
+          console.error('[BCV] Error parseando HTML:', e.message);
+        }
+        peticionEnCursoBCV = null;
+        resolve(cacheTasaBCV.monto ? cacheTasaBCV : { error: 'No se pudo extraer la tasa de www.bcv.org.ve' });
+      });
+    });
+
+    req.on('error', (e) => {
+      console.error('[BCV] Error de red:', e.message);
+      peticionEnCursoBCV = null;
+      resolve(cacheTasaBCV.monto ? cacheTasaBCV : { error: e.message });
+    });
+
+    req.setTimeout(12000, () => {
+      req.abort();
+      console.warn('[BCV] Timeout al consultar www.bcv.org.ve');
+      peticionEnCursoBCV = null;
+      resolve(cacheTasaBCV.monto ? cacheTasaBCV : { error: 'Timeout al conectar a www.bcv.org.ve' });
+    });
+
+    req.end();
+  });
+
+  return peticionEnCursoBCV;
+}
 
 function parsearValoresSQL(cadenaValores) {
   const valores = [];
@@ -132,11 +221,41 @@ const server = http.createServer((req, res) => {
     return res.end(JSON.stringify(datos.productos || []));
   }
 
+  // Endpoint de Tasa Oficial en Vivo desde www.bcv.org.ve
+  if (url === '/api/bcv' || url === '/api/tasa' || url === '/bcv') {
+    return consultarTasaOficialBCV().then((tasa) => {
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify(tasa));
+    });
+  }
+
   // Endpoint de base de datos completa (categorías + productos)
   if (url === '/api/database' || url === '/database' || url === '/api/db') {
     const datos = leerDatosDesdeSQL();
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     return res.end(JSON.stringify(datos));
+  }
+
+  // Endpoint para persistir inserciones y actualizaciones en database/schema.sql
+  if (url === '/api/guardar_sql' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      try {
+        const payload = JSON.parse(body);
+        const sentencia = payload.sql;
+        if (sentencia && typeof sentencia === 'string') {
+          fs.appendFileSync(SCHEMA_PATH, '\n' + sentencia.trim() + ';\n', 'utf8');
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          return res.end(JSON.stringify({ exito: true, mensaje: 'Sentencia SQL persistida en schema.sql' }));
+        }
+      } catch (err) {
+        console.error('Error al guardar en schema.sql:', err.message);
+      }
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ exito: false, error: 'Sentencia inválida' }));
+    });
+    return;
   }
 
   // Ruta raíz de bienvenida e instrucciones

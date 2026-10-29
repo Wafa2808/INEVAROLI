@@ -1,37 +1,48 @@
 /**
  * tasa-bcv.js — Módulo de Conversión Oficial Banco Central de Venezuela (BCV)
- * Garantiza la visualización de precios duales (USD referencial y Bolívares Oficiales)
- * en estricto cumplimiento con la legislación mercantil venezolana.
+ * Obtiene la tasa en vivo directamente de la página oficial del BCV (https://www.bcv.org.ve/)
+ * a través de la API del servidor o endpoints oficiales en tiempo real.
+ * Sin tasas predeterminadas ni ficticias.
  */
 
 var TasaBCV = (function () {
   'use strict';
 
-  var TASA_PREDETERMINADA = 880.12; // Cotización referencial de contingencia
-  var FECHA_PREDETERMINADA = 'Oficial BCV';
+  var tasaCargada = null;
+  var fechaCargada = null;
+  var consultando = false;
 
   function obtenerTasa() {
+    if (tasaCargada && tasaCargada > 0) {
+      return tasaCargada;
+    }
     var guardada = Api.leer('tasa_bcv_datos', null);
     if (guardada && guardada.monto && guardada.monto > 0) {
+      tasaCargada = guardada.monto;
+      fechaCargada = guardada.fecha;
       return guardada.monto;
     }
-    return TASA_PREDETERMINADA;
+    return 0;
   }
 
   function obtenerFecha() {
+    if (fechaCargada) return fechaCargada;
     var guardada = Api.leer('tasa_bcv_datos', null);
     if (guardada && guardada.fecha) {
+      fechaCargada = guardada.fecha;
       return guardada.fecha;
     }
-    return FECHA_PREDETERMINADA;
+    return 'Consultando...';
   }
 
   function fijarTasa(monto, fecha) {
     var num = parseFloat(monto);
     if (!isNaN(num) && num > 0) {
+      tasaCargada = num;
+      fechaCargada = fecha || ('BCV Oficial ' + new Date().toLocaleDateString('es-VE'));
       Api.guardar('tasa_bcv_datos', {
         monto: num,
-        fecha: fecha || new Date().toLocaleDateString('es-VE')
+        fecha: fechaCargada
       });
       actualizarWidget();
       if (typeof renderProductos === 'function') renderProductos();
@@ -41,6 +52,9 @@ var TasaBCV = (function () {
 
   function convertirBs(montoUSD) {
     var tasa = obtenerTasa();
+    if (!tasa || tasa <= 0) {
+      return 'Bs. --';
+    }
     var bs = (Number(montoUSD) || 0) * tasa;
     return 'Bs. ' + bs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
@@ -48,42 +62,92 @@ var TasaBCV = (function () {
   function actualizarWidget() {
     var elValor = document.getElementById('bcv-valor-tasa');
     var elFecha = document.getElementById('bcv-fecha-tasa');
-    if (elValor) elValor.textContent = 'Bs. ' + obtenerTasa().toFixed(2);
-    if (elFecha) elFecha.textContent = obtenerFecha();
-  }
+    var tasa = obtenerTasa();
 
-  async function refrescar() {
-    var btn = document.querySelector('.bcv-btn-refresh');
-    if (btn) btn.classList.add('girando');
-
-    // Simulación de consulta o petición de actualización directa
-    try {
-      // Intentar fetch a API pública liviana si hay internet, o fallback local
-      var res = await fetch('https://ve.dolarapi.com/v1/dolares/oficial').then(function(r) { return r.json(); }).catch(function() { return null; });
-      if (res && res.promedio) {
-        fijarTasa(res.promedio, 'Actualizado ' + new Date().toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' }));
+    if (elValor) {
+      if (tasa > 0) {
+        elValor.textContent = 'Bs. ' + tasa.toFixed(2);
       } else {
-        // Si no hay red (computadora offline), mantener la tasa actual
-        actualizarWidget();
+        elValor.textContent = 'Cargando...';
       }
-    } catch (e) {
-      actualizarWidget();
-    } finally {
-      if (btn) {
-        setTimeout(function () {
-          btn.classList.remove('girando');
-        }, 600);
-      }
+    }
+    if (elFecha) {
+      elFecha.textContent = obtenerFecha();
     }
   }
 
-  // Inicializar al cargar
+  // Consulta en vivo a la página oficial del BCV a través del backend o API pública
+  async function refrescar() {
+    if (consultando) return;
+    consultando = true;
+
+    var btn = document.querySelector('.amz-bcv-refresh') || document.querySelector('.bcv-btn-refresh');
+    if (btn) btn.classList.add('girando');
+
+    // Endpoints candidatos en orden de prioridad para obtener la tasa oficial real del BCV
+    var endpoints = [
+      '/api/bcv',
+      'http://localhost:3001/api/bcv',
+      'http://127.0.0.1:3001/api/bcv',
+      'http://localhost:3000/api/bcv',
+      'https://ve.dolarapi.com/v1/dolares/oficial'
+    ];
+
+    var exito = false;
+
+    for (var i = 0; i < endpoints.length; i++) {
+      var url = endpoints[i];
+      try {
+        var controller = new AbortController();
+        var timeoutId = setTimeout(function () { controller.abort(); }, 4000);
+
+        var resp = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (resp.ok) {
+          var data = await resp.json();
+          // Formato propio de /api/bcv (scraping directo de https://www.bcv.org.ve/)
+          if (data && data.monto && data.monto > 0) {
+            fijarTasa(data.monto, data.fecha || 'Oficial www.bcv.org.ve');
+            exito = true;
+            break;
+          }
+          // Formato alternativo oficial (dolarapi de respaldo)
+          if (data && data.promedio && data.promedio > 0) {
+            var f = data.fechaActualizacion ? new Date(data.fechaActualizacion).toLocaleDateString('es-VE') : 'Oficial BCV';
+            fijarTasa(data.promedio, f);
+            exito = true;
+            break;
+          }
+        }
+      } catch (err) {
+        // Continuar con el siguiente endpoint
+      }
+    }
+
+    if (!exito) {
+      actualizarWidget();
+    }
+
+    consultando = false;
+    if (btn) {
+      setTimeout(function () {
+        btn.classList.remove('girando');
+      }, 500);
+    }
+  }
+
+  // Inicializar y consultar tasa oficial en tiempo real al arrancar
   if (typeof window !== 'undefined') {
-    setTimeout(actualizarWidget, 100);
+    setTimeout(function () {
+      actualizarWidget();
+      refrescar();
+    }, 150);
   }
 
   return {
     obtenerTasa: obtenerTasa,
+    obtenerFecha: obtenerFecha,
     convertirBs: convertirBs,
     fijarTasa: fijarTasa,
     refrescar: refrescar,

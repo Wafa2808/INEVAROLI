@@ -108,7 +108,7 @@ var Favoritos = (function () {
     html += '<div class="fav-lista-grid">';
 
     favProds.forEach(function (p) {
-      var foto = (p.imagenes && p.imagenes.length) ? p.imagenes[0] : 'images/anillo_grado.jpg';
+      var foto = (p.imagenes && p.imagenes.length) ? p.imagenes[0] : 'logo.png';
       var precioBs = typeof TasaBCV !== 'undefined' ? TasaBCV.convertirBs(p.precio) : '';
 
       html +=

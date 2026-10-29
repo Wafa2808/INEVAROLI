@@ -1,0 +1,47 @@
+El login:
+
+Quiero que valides el campo cedula que acepte maximo 12 digitos solo numericos y que tenga una opcion a lado donde seleccione Venezolano(V), Extranjero(E), RIF(V), RIF(E), Juridico(J) y Pasaporte(P). Que tenga la opcion de eligir cual de esos es en el login y al registrar un usuario te lo pida tambien.
+
+
+
+Lado del Cliente:
+
+Cuando abres un producto para la informacion que contiene, quiero que quites la opcion de inscripcion o grabado personalizado que se encuentra abajo, ya que el cliente tiene que eligir solamente de las tallas que hay disponible en stock, ya que el cliente habre el producto para ver la informacion, elige la talla y lo manda al carrito de compras.
+
+Una vez que el cliente haga su pedido, el carrito de compra no se puede vaciar, no puede meter otro producto al carrito hasta que el pedido este concretado via WhatsApp y el admin valide el pago en su usuario.
+
+El cliente tiene que tener un registro de sus pedidos que hace, ya que hace su primer pedido el pedido se coloca en estado pendiente, cuando se cancele el pedido, el pedido pasa a estar en camino, cuando el pedido este en camino puede realizar otro pedido. El registro es para que vea los pedidos que hace.
+
+TODO CON SUS VALIDACIONES
+
+
+
+Lado del Gerente (Administrador):
+
+Quiero que modifiques todo el usuario admin, quiero que quites todo y dejes arriba el nombre de la tienda, el logo de la tienda, lo de bienvenido administrador, el boton de perfil por si el admin quiere modificar alguno de sus datos y la tasa bcv, todo lo demas quitalo. Quiero que coloques 4 botones con menus desplegables, los botones son los siguientes:
+
+Boton 1: Inventario de Joyas & Stock: donde ves todos los productos, puedes colocar si es un producto destacado, el stock del producto, si esta activo o no el producto y 3 botones que sea de editar toda la informacion del producto, eliminar el producto y pausar el producto. Aparte el boton de "Registrar Nueva Joya" que tenga todo el formulario correspondiente pero que no coloque stock, para que el gerente pueda registra una joya y despues hace un pedido de entrada para aumentar el stock en el boton de Pedidos de Entrada.
+
+Boton 2: Gestion de Categorias: que hace lo mismo que tiene ahorita.
+
+Boton 3: Pedidos de Clientes: donde se ve reflejado los pedidos que se han hecho, a lado de cada pedido quiero que coloques un boton que diga "Validar pago" cuando le des diga "Pago Validado" pero que tenga una alerta o aviso que este seguro de validar pago ya que el dinero se mueve via WhatsApp asi para que el gerente este seguro de validar el dinero y quiero que coloques que los pedidos tenga 3 estados: el primero que es "Pendiente" que es cuando el pedido fue hecho, el segundo que es "En Camino" que es cuando el pedido se validado el pago y el tercer estado que es "Entregado" que es cuando el cliente lo recibio.
+
+Boton 4: Pedidos de Entrada: donde tendra una barra buscadora donde buscara fabricas de joyas que ya este registrado en la pagina, en el caso que no este registrado ninguna fabrica quiero que este un boton a lado de la barra buscadora que diga Registrar Fabrica. Al buscar en la barra si ya existe una fabrica el prosito es que selecciones la fabrica y te depliege el inventario de todas las joyas que tiene la pagina y tu selecciones cuales quieres comprar y cuanta cantidad, cabe aclarar que los productos tienen que tener un 50% mayor al precio que me dio la fabrica para que alla ganancia (haslo asi y despues el gerente puede modificar el precio), quiro decir que si un anillo vale 20$ en la fabrica la pagina lo venda en 30$, despues de seleccionar cuales joyas y la cantidad que desea comprar a la fabrica que este un boton que diga "Hacer Pedido" una vez le de al boton tiene que esperar un transcurso de 24 horas para recibir el pedido, has un registro debajo de la barra buscadora de los pedidos de entrada que se allan hecho con un boton a lado que diga "En camino" una vez que pase el tiempo el boton cambia a "Recibir Pedido" (O si le da click en el boton que dice "En camino" que de un aviso que diga "Desea acelerar el tiempo y recibir su pedido" ya que es un entorno simulado para que no tenga que esperar realmente las 24 horas) si le da al boton de Recibir Pedido aumenta el stock de los productos que alla pedido y se mantiene el pedido en el registro pero el boton cambia a "Mostrar Factura" donde se reflejara una factura con los datos de la Fabrica con los productos que pidio.
+
+Formulario para registrar Fabrica (Esto es para el boton de Registrar Fabrica):
+
+Modelo para mostrar factura del pedido que se hizo a la fabrica (Esto es como se deberia ver la factura cuando de click en el boton de Mostrar Fatura):
+
+Quiero que aparte de los 4 botones que pondras arriba, me coloques un dashboard donde este cuatro columnas, la primera que es "Dinero Total" estara en 0 por defecto, donde se aumentara con las "Ganancias" que alla menos los "Gastos", la segunda que es "Ganancia" donde se vera todo el dinero de los pedidos que ya se validaron los pagos anteriormente, la tercera donde sera los "Gastos" donde se vera el dinero de los Pedidos de Entrada que haga el gerente ya que eso es gasto de dinero de las ganancias, por ultimo la columna "Pendiente" donde se vera reflejado el dinero de los pedidos que no se han validados los pagos. Entonces el movimiento es que el cliente hace el pedido y el dinero queda en Pendiente, caundo se valide el pago pasa a Ganancia, si el gerente hace un pedido de entrada se coloque en Gastos, entonces en Dinero Total se le resta la Ganancia menos los Gastos.
+
+TODO CON SUS VALIDACIONES
+
+
+
+Base de Datos:
+
+Quiero que todo los productos tengan un stock de cada producto como esta ahorita pero segmentado por todas las tallas, por decir 5 anillos de cada talla, para que el cliente eliga la opcion que desea y pueda comprar la talla en especifico del anillo que quiera comprar.
+
+Quiero que todo usuario que se registre o que se modifique se guarde en la base de datos para que no se borre o se pierda lo que se edito del usuario cuando se cierre la pagina o cuando se cierre el servidor de la base de datos.
+
+Quiero que cuando se registre una joya en la parte de Inventario de Joyas & Stock del usuario administrador se guarde en la base de datos para que no se borre cuando cierre la pagina o cuando cierre el servidor de la base de datos.

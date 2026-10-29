@@ -13,6 +13,13 @@ import os
 import sys
 import json
 import re
+import time
+import ssl
+
+if sys.version_info[0] >= 3:
+    import urllib.request as urllib_req
+else:
+    import urllib2 as urllib_req
 
 # Compatibilidad segura con consolas Windows (Python 3.6+, Windows 7)
 try:
@@ -38,6 +45,74 @@ class ReusableHTTPServer(HTTPServer):
 PORT_DB = 3001
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SCHEMA_PATH = os.path.join(BASE_DIR, 'database', 'schema.sql')
+
+# ─── Cache de Tasa Oficial BCV (https://www.bcv.org.ve/) ───
+CACHE_BCV = {
+    'monto': None,
+    'monto_formateado': None,
+    'fecha': None,
+    'fuente': 'Banco Central de Venezuela (https://www.bcv.org.ve/)',
+    'timestamp': 0,
+    'oficial': True
+}
+
+def consultar_tasa_oficial_bcv():
+    ahora = time.time()
+    # Cache durante 15 minutos (900 segundos)
+    if CACHE_BCV.get('monto') and (ahora - CACHE_BCV.get('timestamp', 0) < 900):
+        return CACHE_BCV
+
+    try:
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+    except Exception:
+        ctx = None
+
+    url = 'https://www.bcv.org.ve/'
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8'
+    }
+
+    try:
+        req = urllib_req.Request(url, headers=headers)
+        if ctx:
+            resp = urllib_req.urlopen(req, timeout=12, context=ctx)
+        else:
+            resp = urllib_req.urlopen(req, timeout=12)
+
+        html = resp.read().decode('utf-8', errors='ignore')
+        resp.close()
+
+        # Extraer cotizacion del dolar
+        m_dolar = re.search(r'id=["\']dolar["\'].*?<strong[^>]*>\s*([0-9.,]+)\s*</strong>', html, re.DOTALL | re.IGNORECASE)
+        m_fecha = re.search(r'Fecha Valor:\s*<span[^>]*>\s*([^<]+)\s*</span>', html, re.DOTALL | re.IGNORECASE)
+
+        fecha_texto = re.sub(r'\s+', ' ', m_fecha.group(1).strip()) if m_fecha else time.strftime('%d/%m/%Y')
+
+        if m_dolar:
+            raw = m_dolar.group(1).strip()
+            num = float(raw.replace('.', '').replace(',', '.'))
+            if num > 0:
+                CACHE_BCV['monto'] = num
+                CACHE_BCV['monto_formateado'] = raw
+                CACHE_BCV['fecha'] = fecha_texto
+                CACHE_BCV['timestamp'] = ahora
+                CACHE_BCV['oficial'] = True
+                return CACHE_BCV
+    except Exception as e:
+        print('[BCV API] Error consultando https://www.bcv.org.ve/:', str(e))
+
+    if CACHE_BCV.get('monto'):
+        return CACHE_BCV
+
+    return {
+        'error': 'No se pudo conectar con www.bcv.org.ve',
+        'fuente': 'https://www.bcv.org.ve/',
+        'oficial': False
+    }
 
 
 def limpiar_valor_sql(val):
@@ -195,6 +270,23 @@ class ManejadorBD(BaseHTTPRequestHandler):
         except (IOError, OSError):
             pass
 
+    def do_POST(self):
+        parsed = urlparse(self.path)
+        ruta = parsed.path
+        if ruta == '/api/guardar_sql':
+            try:
+                longitud = int(self.headers.get('Content-Length', 0))
+                cuerpo = self.rfile.read(longitud).decode('utf-8')
+                payload = json.loads(cuerpo)
+                sentencia = payload.get('sql')
+                if sentencia and isinstance(sentencia, (str, unicode) if sys.version_info[0] < 3 else str):
+                    with open(SCHEMA_PATH, 'a', encoding='utf-8' if sys.version_info[0] >= 3 else None) as f:
+                        f.write(u'\n' + sentencia.strip() + u';\n')
+                    return self.responder_json(200, {'exito': True, 'mensaje': 'Sentencia persistida en schema.sql'})
+            except Exception as e:
+                return self.responder_json(400, {'exito': False, 'error': str(e)})
+        self.responder_json(404, {'error': 'Ruta POST no encontrada'})
+
     def do_GET(self):
         parsed = urlparse(self.path)
         ruta = parsed.path
@@ -217,12 +309,17 @@ class ManejadorBD(BaseHTTPRequestHandler):
             datos = leer_datos_desde_sql()
             return self.responder_json(200, datos.get('productos', []))
 
-        # 3. API Base de Datos Completa (para frontend INVERANOLI)
+        # 3. API Tasa Oficial BCV en Vivo desde www.bcv.org.ve
+        if ruta in ('/api/bcv', '/api/tasa', '/bcv'):
+            tasa = consultar_tasa_oficial_bcv()
+            return self.responder_json(200, tasa)
+
+        # 4. API Base de Datos Completa (para frontend INVERANOLI)
         if ruta in ('/api/database', '/database', '/api/db'):
             datos = leer_datos_desde_sql()
             return self.responder_json(200, datos)
 
-        # 4. Pantalla de bienvenida
+        # 5. Pantalla de bienvenida
         if ruta in ('/', ''):
             datos = leer_datos_desde_sql()
             total_prods = len(datos.get('productos', []))

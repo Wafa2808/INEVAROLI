@@ -130,9 +130,10 @@ function actualizarMedidorFuerza(inputPassId, barraId, textoId) {
   }
 }
 
-// Validador estricto de cédula venezolana
+// Validador de documento de identidad / RIF / Pasaporte (máximo 12 dígitos solo numéricos)
 function esCedulaValida(cedula) {
-  return /^\d{7,8}$/.test(String(cedula).trim());
+  var c = String(cedula).trim();
+  return /^\d{1,12}$/.test(c);
 }
 
 // Validador de teléfono venezolano (+58)

@@ -39,15 +39,13 @@ function mostrarPedidosModal() {
   // Ordenar de más reciente a más antiguo
   ordenes.slice().reverse().forEach(function (ord) {
     var estadoBadge = '';
-    var est = ord.estado || 'recibido';
-    if (est === 'recibido') {
-      estadoBadge = '<span class="badge-estado badge-recibido">Recibido</span>';
-    } else if (est === 'preparacion') {
-      estadoBadge = '<span class="badge-estado badge-preparacion">En Taller / Ajuste de Talla</span>';
-    } else if (est === 'camino') {
-      estadoBadge = '<span class="badge-estado badge-camino">En Camino / Listo para Entrega</span>';
+    var est = ord.estado || 'pendiente';
+    if (est === 'pendiente' || est === 'recibido') {
+      estadoBadge = '<span class="badge-estado badge-preparacion" style="background:#f59e0b; color:#1e293b; font-weight:700;">Pendiente (Validando Pago)</span>';
+    } else if (est === 'en_camino' || est === 'camino' || est === 'preparacion') {
+      estadoBadge = '<span class="badge-estado badge-camino" style="background:#38bdf8; color:#0f172a; font-weight:700;">En Camino</span>';
     } else if (est === 'entregado') {
-      estadoBadge = '<span class="badge-estado badge-entregado">Entregado</span>';
+      estadoBadge = '<span class="badge-estado badge-entregado" style="background:#10b981; color:#ffffff; font-weight:700;">Entregado</span>';
     }
 
     var totalBs = typeof TasaBCV !== 'undefined' ? TasaBCV.convertirBs(ord.total) : '';
