@@ -409,10 +409,10 @@ body.admin-mode-active .modal-cerrar {
 .admin-header-logo {
   width: 48px;
   height: 48px;
-  border-radius: 8px;
+  border-radius: 50%;
   border: 1.5px solid var(--gold-primary);
   object-fit: cover;
-  background: #000;
+  background: #ffffff;
 }
 
 .admin-header-controles {

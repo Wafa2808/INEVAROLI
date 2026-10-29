@@ -869,6 +869,7 @@
   box-shadow: 0 4px 18px rgba(212, 175, 55, 0.35);
   margin-bottom: 12px;
   object-fit: cover;
+  background: #ffffff;
 }
 
 .auth-brand-titulo {
